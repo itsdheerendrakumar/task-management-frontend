@@ -6,22 +6,40 @@ import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
+import type { LoginPayload } from "@/services/auth/types";
+import { login } from "@/services/auth";
+import { useMutation } from "@tanstack/react-query";
+import { useGetProfile } from "@/hooks/useGetProfile";
+import { useEffect } from "react";
 const schema = z.object({
   email: z.string().email("Enter a valid email"),
   password: z.string().min(6, "At least 6 characters"),
 });
-type Values = z.infer<typeof schema>;
+
 export function LoginPage() {
+  const {profileQuery} = useGetProfile();
   const navigate = useNavigate();
-  const { register, handleSubmit, formState: { errors } } = useForm<Values>({
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginPayload>({
     resolver: zodResolver(schema),
     defaultValues: { email: "", password: "" },
   });
 
-  const onSubmit = async (data: Values) => {
-    console.log("Logging in with", data);
+  const loginMutation = useMutation({
+    mutationFn: (data: LoginPayload) => login(data),
+    onSuccess: () => {
+      navigate({ to: "/" });
+    }
+  });
+
+  const onSubmit =  (data: LoginPayload) => {
+    loginMutation.mutate(data)
   };
+
+  useEffect(() => {
+    if(profileQuery?.data?.data) {
+      navigate({ to: "/" })
+    }
+  }, [profileQuery?.data?.data])
 
   return (
     <div className="grid min-h-screen bg-background">
@@ -51,7 +69,7 @@ export function LoginPage() {
               <Input id="password" placeholder="Enter password" type="password" {...register("password")} className="mt-1.5" />
               {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password.message}</p>}
             </div>
-            <Button type="submit" className="w-full">
+            <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
               Sign in
             </Button>
           </form>

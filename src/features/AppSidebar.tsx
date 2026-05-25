@@ -3,12 +3,15 @@ import {
     SidebarContent,
     SidebarHeader,
 } from "@/components/ui/sidebar"
+import { useGetProfile } from "@/hooks/useGetProfile";
 
 export function AppSidebar() {
+    const { profileQuery } = useGetProfile();
     return (
         <Sidebar>
             <SidebarHeader>
-                <h2 className="text-lg font-semibold">Navigation</h2>
+                Welcome back
+                <h2 className="text-lg font-semibold">{profileQuery.data?.data?.name} ({profileQuery.data?.data?.role})</h2>
             </SidebarHeader>
             <SidebarContent>
             </SidebarContent>
