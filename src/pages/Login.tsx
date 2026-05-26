@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import type { LoginPayload } from "@/services/auth/types";
 import { login } from "@/services/auth";
 import { useMutation } from "@tanstack/react-query";
-import { useGetProfile } from "@/hooks/useGetProfile";
 import { useEffect } from "react";
 const schema = z.object({
   email: z.string().email("Enter a valid email"),
@@ -17,7 +16,6 @@ const schema = z.object({
 });
 
 export function LoginPage() {
-  const {profileQuery} = useGetProfile();
   const navigate = useNavigate();
   const { register, handleSubmit, formState: { errors } } = useForm<LoginPayload>({
     resolver: zodResolver(schema),
@@ -35,11 +33,11 @@ export function LoginPage() {
     loginMutation.mutate(data)
   };
 
-  useEffect(() => {
-    if(profileQuery?.data?.data) {
-      navigate({ to: "/" })
-    }
-  }, [profileQuery?.data?.data])
+  // useEffect(() => {
+  //   if(profileQuery?.data?.data && profileQuery.isSuccess) {
+  //     navigate({ to: "/" })
+  //   }
+  // }, [profileQuery?.data?.data])
 
   return (
     <div className="grid min-h-screen bg-background">
