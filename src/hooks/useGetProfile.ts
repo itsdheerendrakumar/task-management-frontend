@@ -1,5 +1,5 @@
 import { getProfile } from '@/services/user'
-import { queryKeys } from '@/constants/query-keys'
+import { queryKeys } from '@/constants/query-keys.ts'
 import { useQuery } from '@tanstack/react-query'
 
 export function useGetProfile() {

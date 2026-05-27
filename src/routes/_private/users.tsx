@@ -1,9 +1,7 @@
+//imoort by lazy loading the component
+import { User } from '@/pages/User'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_private/users')({
-  component: RouteComponent,
+  component: User,
 })
-
-function RouteComponent() {
-  return <div>Hello "/_private/user"!</div>
-}

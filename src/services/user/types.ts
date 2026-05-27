@@ -9,3 +9,4 @@ interface ProfileData {
 }
 
 export type GetProfileResponse = ApiResponse<ProfileData>
+export type GetUsersResponse = ApiResponse<ProfileData[]>

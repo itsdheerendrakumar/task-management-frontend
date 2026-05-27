@@ -9,7 +9,7 @@ import {
 export function Header() {
     const { profileQuery } = useGetProfile();
     return (
-        <header className="border-b border-gray-200 bg-white h-16 flex justify-between items-center pl-2 pr-6">
+        <header className="border-b border-gray-200 bg-white h-16 flex justify-between items-center pl-2 pr-6 sticky top-0 z-10">
             <SidebarTrigger />
             <div className="flex items-center justify-between">
                 <Avatar>
