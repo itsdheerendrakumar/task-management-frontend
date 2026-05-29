@@ -26,6 +26,10 @@ export const inviteUserSchema = z.object({
   email: z
     .email("Please enter a valid email address"),
 
+  password: z
+    .string()
+    .min(6, "Password must be at least 6 characters"),
+
   role: z.enum([
     "projectManager",
     "member",
@@ -117,6 +121,23 @@ export function CreateuserModal({
             {form.formState.errors.email && (
               <p className="text-sm text-red-500">
                 {form.formState.errors.email.message as string}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="password">Password</Label>
+
+            <Input
+              id="password"
+              type="password"
+              placeholder="Enter password"
+              className="h-12 rounded-xl"
+              {...form.register("password")}
+            />
+
+            {form.formState.errors.password && (
+              <p className="text-sm text-red-500">
+                {form.formState.errors.password.message as string}
               </p>
             )}
           </div>
