@@ -1,9 +1,6 @@
+import { Task } from '@/pages/Task'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_private/tasks')({
-  component: RouteComponent,
+  component: Task,
 })
-
-function RouteComponent() {
-  return <div>Hello "/_private/tasks"!</div>
-}

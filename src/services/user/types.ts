@@ -8,5 +8,12 @@ interface ProfileData {
     profile_image: string
 }
 
+interface SelectUserDaa {
+    id: number
+    name: string
+    role: string
+}
+
 export type GetProfileResponse = ApiResponse<ProfileData>
 export type GetUsersResponse = ApiResponse<ProfileData[]>
+export type SelectUsersResponse = ApiResponse<SelectUserDaa[]>
