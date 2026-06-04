@@ -2,10 +2,11 @@ import {
     Sidebar,
     SidebarContent,
     SidebarHeader,
+    SidebarFooter,
 } from "@/components/ui/sidebar"
 import { useGetProfile } from "@/hooks/useGetProfile";
 import { userRoutes } from "@/constants/sidebar-item";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouter } from "@tanstack/react-router";
 import type { ComponentType } from "react";
 import {
     Activity,
@@ -17,8 +18,12 @@ import {
     Settings,
     TrendingUp,
     Users,
-    User
+    User,
+    LogOut
 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { logout } from "@/services/auth";
+import { useMutation } from "@tanstack/react-query";
 
 const routeIcons: Record<string, ComponentType<{ className?: string }>> = {
     "/dashboard": Home,
@@ -35,6 +40,24 @@ const routeIcons: Record<string, ComponentType<{ className?: string }>> = {
 
 export function AppSidebar() {
     const { profileQuery } = useGetProfile();
+    const router = useRouter();
+
+    const logoutMutation = useMutation({
+        mutationFn: logout,
+        onSuccess: async () => {
+            localStorage.removeItem('token');
+            sessionStorage.removeItem('token');
+            await router.navigate({ to: '/login' });
+        },
+        onError: (error) => {
+            console.error('Logout failed:', error);
+        },
+    });
+
+    const handleLogout = async () => {
+        await logoutMutation.mutateAsync();
+    };
+
     return (
         <Sidebar
             style={{
@@ -70,6 +93,17 @@ export function AppSidebar() {
                     }
                 })}
             </SidebarContent>
+            <SidebarFooter className="px-4 py-4">
+                <Button
+                    onClick={handleLogout}
+                    disabled={logoutMutation?.isPending}
+                    variant="destructive"
+                    className="w-full flex items-center gap-2"
+                >
+                    <LogOut className="h-4 w-4" />
+                    {logoutMutation?.isPending ? 'Logging out...' : 'Logout'}
+                </Button>
+            </SidebarFooter>
         </Sidebar>
     )
 }

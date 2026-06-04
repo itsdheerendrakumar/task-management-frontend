@@ -9,3 +9,8 @@ export async function createNewUser(payload: RegisterUserPayload) {
     const response = await api.post("/auth/register", payload);
     return response.data;
 }
+
+export async function logout() {
+    const response = await api.post('auth/logout');
+    return response.data;
+}

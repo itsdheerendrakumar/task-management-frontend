@@ -1,9 +1,6 @@
+import { Dashboard } from '@/pages/Dashboard'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/_private/')({
-  component: RouteComponent,
+  component: Dashboard,
 })
-
-function RouteComponent() {
-  return <div>Hello "/(_private)/"!</div>
-}
