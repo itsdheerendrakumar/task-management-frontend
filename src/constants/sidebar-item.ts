@@ -46,26 +46,10 @@ export const userRoutes = [
     ],
   },
   {
-    label: "Analytics",
-    route: "/analytics",
-    allowedRoles: [
-      role.admin,
-      role.projectManager,
-    ],
-  },
-  {
     label: "Users",
     route: "/users",
     allowedRoles: [
       role.admin,
-    ],
-  },
-  {
-    label: "Team",
-    route: "/team",
-    allowedRoles: [
-      role.admin,
-      role.projectManager,
     ],
   },
   {

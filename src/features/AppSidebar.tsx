@@ -16,8 +16,6 @@ import {
     LayoutDashboard,
     MessageCircle,
     Settings,
-    TrendingUp,
-    Users,
     User,
     LogOut
 } from "lucide-react";
@@ -32,8 +30,6 @@ const routeIcons: Record<string, ComponentType<{ className?: string }>> = {
     "/settings": Settings,
     "/tasks": ClipboardList,
     "/kanban": LayoutDashboard,
-    "/analytics": TrendingUp,
-    "/team": Users,
     "/activity": Activity,
     "/users": User,
 };
