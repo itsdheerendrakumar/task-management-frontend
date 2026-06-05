@@ -12,6 +12,13 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PrivateRouteRouteImport } from './routes/_private/route'
 import { Route as PrivateIndexRouteImport } from './routes/_private/index'
 import { Route as PublicLoginRouteImport } from './routes/_public/login'
+import { Route as PrivateUsersRouteImport } from './routes/_private/users'
+import { Route as PrivateTasksRouteImport } from './routes/_private/tasks'
+import { Route as PrivateSettingsRouteImport } from './routes/_private/settings'
+import { Route as PrivateNotificationsRouteImport } from './routes/_private/notifications'
+import { Route as PrivateMessagesRouteImport } from './routes/_private/messages'
+import { Route as PrivateKanbanRouteImport } from './routes/_private/kanban'
+import { Route as PrivateActivityRouteImport } from './routes/_private/activity'
 
 const PrivateRouteRoute = PrivateRouteRouteImport.update({
   id: '/_private',
@@ -27,27 +34,112 @@ const PublicLoginRoute = PublicLoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PrivateUsersRoute = PrivateUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
+const PrivateTasksRoute = PrivateTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
+const PrivateSettingsRoute = PrivateSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
+const PrivateNotificationsRoute = PrivateNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
+const PrivateMessagesRoute = PrivateMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
+const PrivateKanbanRoute = PrivateKanbanRouteImport.update({
+  id: '/kanban',
+  path: '/kanban',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
+const PrivateActivityRoute = PrivateActivityRouteImport.update({
+  id: '/activity',
+  path: '/activity',
+  getParentRoute: () => PrivateRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof PrivateIndexRoute
+  '/activity': typeof PrivateActivityRoute
+  '/kanban': typeof PrivateKanbanRoute
+  '/messages': typeof PrivateMessagesRoute
+  '/notifications': typeof PrivateNotificationsRoute
+  '/settings': typeof PrivateSettingsRoute
+  '/tasks': typeof PrivateTasksRoute
+  '/users': typeof PrivateUsersRoute
   '/login': typeof PublicLoginRoute
 }
 export interface FileRoutesByTo {
+  '/activity': typeof PrivateActivityRoute
+  '/kanban': typeof PrivateKanbanRoute
+  '/messages': typeof PrivateMessagesRoute
+  '/notifications': typeof PrivateNotificationsRoute
+  '/settings': typeof PrivateSettingsRoute
+  '/tasks': typeof PrivateTasksRoute
+  '/users': typeof PrivateUsersRoute
   '/login': typeof PublicLoginRoute
   '/': typeof PrivateIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_private': typeof PrivateRouteRouteWithChildren
+  '/_private/activity': typeof PrivateActivityRoute
+  '/_private/kanban': typeof PrivateKanbanRoute
+  '/_private/messages': typeof PrivateMessagesRoute
+  '/_private/notifications': typeof PrivateNotificationsRoute
+  '/_private/settings': typeof PrivateSettingsRoute
+  '/_private/tasks': typeof PrivateTasksRoute
+  '/_private/users': typeof PrivateUsersRoute
   '/_public/login': typeof PublicLoginRoute
   '/_private/': typeof PrivateIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login'
+  fullPaths:
+    | '/'
+    | '/activity'
+    | '/kanban'
+    | '/messages'
+    | '/notifications'
+    | '/settings'
+    | '/tasks'
+    | '/users'
+    | '/login'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/'
-  id: '__root__' | '/_private' | '/_public/login' | '/_private/'
+  to:
+    | '/activity'
+    | '/kanban'
+    | '/messages'
+    | '/notifications'
+    | '/settings'
+    | '/tasks'
+    | '/users'
+    | '/login'
+    | '/'
+  id:
+    | '__root__'
+    | '/_private'
+    | '/_private/activity'
+    | '/_private/kanban'
+    | '/_private/messages'
+    | '/_private/notifications'
+    | '/_private/settings'
+    | '/_private/tasks'
+    | '/_private/users'
+    | '/_public/login'
+    | '/_private/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -78,14 +170,77 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PublicLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_private/users': {
+      id: '/_private/users'
+      path: '/users'
+      fullPath: '/users'
+      preLoaderRoute: typeof PrivateUsersRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
+    '/_private/tasks': {
+      id: '/_private/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof PrivateTasksRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
+    '/_private/settings': {
+      id: '/_private/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof PrivateSettingsRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
+    '/_private/notifications': {
+      id: '/_private/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof PrivateNotificationsRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
+    '/_private/messages': {
+      id: '/_private/messages'
+      path: '/messages'
+      fullPath: '/messages'
+      preLoaderRoute: typeof PrivateMessagesRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
+    '/_private/kanban': {
+      id: '/_private/kanban'
+      path: '/kanban'
+      fullPath: '/kanban'
+      preLoaderRoute: typeof PrivateKanbanRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
+    '/_private/activity': {
+      id: '/_private/activity'
+      path: '/activity'
+      fullPath: '/activity'
+      preLoaderRoute: typeof PrivateActivityRouteImport
+      parentRoute: typeof PrivateRouteRoute
+    }
   }
 }
 
 interface PrivateRouteRouteChildren {
+  PrivateActivityRoute: typeof PrivateActivityRoute
+  PrivateKanbanRoute: typeof PrivateKanbanRoute
+  PrivateMessagesRoute: typeof PrivateMessagesRoute
+  PrivateNotificationsRoute: typeof PrivateNotificationsRoute
+  PrivateSettingsRoute: typeof PrivateSettingsRoute
+  PrivateTasksRoute: typeof PrivateTasksRoute
+  PrivateUsersRoute: typeof PrivateUsersRoute
   PrivateIndexRoute: typeof PrivateIndexRoute
 }
 
 const PrivateRouteRouteChildren: PrivateRouteRouteChildren = {
+  PrivateActivityRoute: PrivateActivityRoute,
+  PrivateKanbanRoute: PrivateKanbanRoute,
+  PrivateMessagesRoute: PrivateMessagesRoute,
+  PrivateNotificationsRoute: PrivateNotificationsRoute,
+  PrivateSettingsRoute: PrivateSettingsRoute,
+  PrivateTasksRoute: PrivateTasksRoute,
+  PrivateUsersRoute: PrivateUsersRoute,
   PrivateIndexRoute: PrivateIndexRoute,
 }
 
