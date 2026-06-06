@@ -1,9 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router'
+﻿import { createFileRoute } from '@tanstack/react-router'
+import Settings from '../../pages/Settings'
 
 export const Route = createFileRoute('/_private/settings')({
-  component: RouteComponent,
+  component: Settings,
 })
-
-function RouteComponent() {
-  return <div>Hello "/_private/settings"!</div>
-}

@@ -1,4 +1,4 @@
-import type { ApiResponse } from "@/utils/response"
+﻿import type { ApiResponse } from "@/utils/response"
 
 interface ProfileData {
     id: string
@@ -17,3 +17,15 @@ interface SelectUserDaa {
 export type GetProfileResponse = ApiResponse<ProfileData>
 export type GetUsersResponse = ApiResponse<ProfileData[]>
 export type SelectUsersResponse = ApiResponse<SelectUserDaa[]>
+
+export type UpdateProfilePayload = {
+    name: string
+    profile_image?: File | null
+}
+
+export type ChangePasswordPayload = {
+    currentPassword: string
+    newPassword: string
+}
+
+export type ChangePasswordResponse = ApiResponse<null>
