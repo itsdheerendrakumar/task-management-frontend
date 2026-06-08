@@ -41,6 +41,6 @@ export async function updateProfile(payload: UpdateProfilePayload): Promise<GetP
 }
 
 export async function changePassword(payload: ChangePasswordPayload): Promise<ChangePasswordResponse> {
-    const response = await api.put('/user/password', payload);
+    const response = await api.patch('/user/change-password', payload);
     return response.data;
 }

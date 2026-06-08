@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { toast } from 'sonner'
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -94,6 +95,11 @@ export default function Settings() {
         URL.revokeObjectURL(localPreviewUrl)
         setLocalPreviewUrl(null)
       }
+      toast.success('Profile photo updated successfully.')
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : 'Unable to update profile photo.'
+      toast.error(message)
     },
   })
 
@@ -102,6 +108,11 @@ export default function Settings() {
       changePassword(payload),
     onSuccess: () => {
       passwordForm.reset()
+      toast.success('Password updated successfully.')
+    },
+    onError: (error) => {
+      const message = error instanceof Error ? error.message : 'Unable to update password.'
+      toast.error(message)
     },
   })
 
@@ -180,10 +191,6 @@ export default function Settings() {
                   </Avatar>
 
                   <div className="space-y-3">
-                    <div className="space-y-1">
-                      <Label className="text-sm font-medium">Profile photo</Label>
-                      <p className="text-sm text-muted-foreground">Upload a square image that represents you.</p>
-                    </div>
                     <label
                       htmlFor="profile-image"
                       className="inline-flex cursor-pointer items-center justify-center rounded-full border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-100"
@@ -236,20 +243,6 @@ export default function Settings() {
                   </p>
                 </div>
               </div>
-
-              {updateProfileMutation.isError && (
-                <div className="rounded-2xl border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
-                  {updateProfileMutation.error instanceof Error
-                    ? updateProfileMutation.error.message
-                    : 'Unable to save profile. Please try again.'}
-                </div>
-              )}
-
-              {updateProfileMutation.isSuccess && (
-                <div className="rounded-2xl border border-emerald-200 bg-emerald-100 p-4 text-sm text-emerald-700">
-                  Your profile was updated successfully.
-                </div>
-              )}
 
               <div className="flex justify-end">
                 <Button type="submit" disabled={updateProfileMutation.isPending || !profileImageFile}>
@@ -312,20 +305,6 @@ export default function Settings() {
                   )}
                 </div>
               </div>
-
-              {changePasswordMutation.isError && (
-                <div className="rounded-2xl border border-destructive/50 bg-destructive/10 p-4 text-sm text-destructive">
-                  {changePasswordMutation.error instanceof Error
-                    ? changePasswordMutation.error.message
-                    : 'Unable to update password. Please try again.'}
-                </div>
-              )}
-
-              {changePasswordMutation.isSuccess && (
-                <div className="rounded-2xl border border-emerald-200 bg-emerald-100 p-4 text-sm text-emerald-700">
-                  Password updated successfully.
-                </div>
-              )}
 
               <div className="flex justify-end">
                 <Button type="submit" disabled={changePasswordMutation.isPending}>
