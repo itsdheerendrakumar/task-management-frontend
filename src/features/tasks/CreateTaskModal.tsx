@@ -4,7 +4,7 @@ import React from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { useMutation, useQuery } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import Select, { type OnChangeValue } from "react-select"
 import {
   Dialog,
@@ -18,10 +18,9 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { queryKeys } from "@/constants/query-keys"
-import { getSelectUserListing } from "@/services/user"
 import { createTask } from "@/services/task"
 import type { CreateTaskPayload } from "@/services/task/types"
+import { useParticipantQuery } from "@/hooks/useParticipantQuery"
 
 const participantSchema = z.object({
   user_id: z.number().int().positive(),
@@ -84,10 +83,7 @@ export default function CreateTaskModal({ onCreate }: CreateTaskModalProps) {
     SelectedParticipant[]
   >([])
 
-  const participantsQuery = useQuery({
-    queryKey: [queryKeys.selectUserListing],
-    queryFn: () => getSelectUserListing(["projectManager", "member", "client"]),
-  })
+  const {participantsQuery} = useParticipantQuery()
 
   const participantOptions = participantsQuery.data?.data ?? []
 

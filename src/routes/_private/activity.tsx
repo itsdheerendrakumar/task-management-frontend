@@ -1,9 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-
+import { Activity } from '@/pages/Activity'
 export const Route = createFileRoute('/_private/activity')({
-  component: RouteComponent,
+  component: Activity,
 })
-
-function RouteComponent() {
-  return <div>Hello "/_private/activity"!</div>
-}
