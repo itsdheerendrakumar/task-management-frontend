@@ -9,6 +9,10 @@ interface ActivityData {
   meta_data: Record<string, unknown> | null;
   performed_by: number;
   created_at: string; // ISO date string
+  user: {
+    name: string | null;
+    profile_image: string | null;
+  };
 }
 interface ActivityWithPagination {
   data: ActivityData[];

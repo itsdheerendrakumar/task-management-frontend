@@ -23,9 +23,9 @@ import {
     SelectValue,
 } from "@/components/ui/select"
 import { useState } from 'react';
-import ReactPaginate from 'react-paginate';
 import { useParticipantQuery } from '@/hooks/useParticipantQuery';
-console.log(ReactPaginate)
+import { Button } from '@/components/ui/button';
+
 export function Activity() {
     const {participantsQuery} = useParticipantQuery(["admin"]);
     const [userId, setUserId] = useState<string>("");
@@ -37,11 +37,15 @@ export function Activity() {
         queryFn: () => getActivity({ limit, page, userId }),
         refetchOnWindowFocus: false
     });
+
+    const pagination = activityQuery.data?.data?.pagination;
+    const totalPages = pagination?.totalPages ?? 1;
+
     return (
         <Card>
             <CardHeader className="flex items-center justify-between gap-4 flex-wrap">
                 <CardTitle>Activity Log</CardTitle>
-                <Select value={userId} onValueChange={setUserId} disabled={activityQuery.isFetching}>
+                <Select value={userId} onValueChange={(value) => { setUserId(value); setPage(1); }} disabled={activityQuery.isFetching}>
                         <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Select User" />
                         </SelectTrigger>
@@ -66,7 +70,7 @@ export function Activity() {
                         <TableRow>
                             <TableHead className="w-40">Action</TableHead>
                             <TableHead>Message</TableHead>
-                            <TableHead className="w-32">User ID</TableHead>
+                            <TableHead className="w-40">Performed By</TableHead>
                             <TableHead className="w-48">Created At</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -98,7 +102,16 @@ export function Activity() {
                                     </TableCell>
 
                                     <TableCell>
-                                        {activity.performed_by}
+                                        <div className="flex items-center gap-2">
+                                            {activity.user?.profile_image && (
+                                                <img
+                                                    src={activity.user.profile_image}
+                                                    alt={activity.user.name ?? ""}
+                                                    className="w-6 h-6 rounded-full object-cover"
+                                                />
+                                            )}
+                                            <span>{activity.user?.name ?? "Unknown"}</span>
+                                        </div>
                                     </TableCell>
 
                                     <TableCell className="text-muted-foreground">
@@ -124,8 +137,8 @@ export function Activity() {
                     </TableBody>
                 </Table>
                 {activityQuery.isSuccess && 
-                <div className="flex items-center justify-between mt-4 px-4">
-                    <Select value={limit} onValueChange={setLimit}>
+                <div className="flex items-center justify-between mt-4 px-4 pb-4">
+                    <Select value={limit} onValueChange={(value) => { setLimit(value); setPage(1); }}>
                         <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Rows per page" />
                         </SelectTrigger>
@@ -140,27 +153,27 @@ export function Activity() {
                         </SelectContent>
                     </Select>
 
-                    <p>Current Page: {page}</p>
-
-                    {/* <ReactPaginate
-                        breakLabel="..."
-                        nextLabel="Next >"
-                        previousLabel="< Previous"
-                        pageCount={10}
-                        pageRangeDisplayed={5}
-                        marginPagesDisplayed={2}
-                        onPageChange={(selectedItem) => {
-                            setPage(selectedItem.selected + 1);
-                        }}
-                        forcePage={page - 1}
-                        renderOnZeroPageCount={null}
-                        containerClassName="flex items-center justify-center gap-2 mt-4"
-                        pageClassName="border rounded px-3 py-1 cursor-pointer"
-                        activeClassName="bg-primary text-primary-foreground"
-                        previousClassName="border rounded px-3 py-1 cursor-pointer"
-                        nextClassName="border rounded px-3 py-1 cursor-pointer"
-                        breakClassName="px-2"
-                    /> */}
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPage((p) => Math.max(1, p - 1))}
+                            disabled={page <= 1 || activityQuery.isFetching}
+                        >
+                            Previous
+                        </Button>
+                        <span className="text-sm text-muted-foreground">
+                            Page {page} of {totalPages}
+                        </span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setPage((p) => p + 1)}
+                            disabled={page >= totalPages || activityQuery.isFetching}
+                        >
+                            Next
+                        </Button>
+                    </div>
                 </div>
                 }
             </CardContent>
