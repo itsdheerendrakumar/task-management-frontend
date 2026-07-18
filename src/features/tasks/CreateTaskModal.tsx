@@ -23,7 +23,7 @@ import type { CreateTaskPayload } from "@/services/task/types"
 import { useParticipantQuery } from "@/hooks/useParticipantQuery"
 
 const participantSchema = z.object({
-  user_id: z.number().int().positive(),
+  user_id: z.string().min(1, "User ID is required"),
   role: z.enum(["admin", "projectManager", "client", "member"]),
 })
 
@@ -53,7 +53,7 @@ type ParticipantOption = {
 }
 
 type SelectedParticipant = {
-  user_id: number
+  user_id: string
   role: ParticipantRole
   name: string
 }
@@ -108,7 +108,7 @@ export default function CreateTaskModal({ onCreate }: CreateTaskModalProps) {
     selected: OnChangeValue<ParticipantOption, true>,
   ) => {
     const nextParticipants = selected.map((option) => ({
-      user_id: Number(option.value),
+      user_id: option.value,
       role: option.role,
       name: option.name,
     }))
