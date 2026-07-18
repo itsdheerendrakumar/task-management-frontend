@@ -3,6 +3,7 @@ import type { ApiResponse } from "@/utils/response";
 export interface TaskMetrics {
   totaltask: number;
   pendingTask: number;
+  inProgressTask: number;
   completedTask: number;
   overedueTask: number;
 }

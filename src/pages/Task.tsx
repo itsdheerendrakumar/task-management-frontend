@@ -36,7 +36,8 @@ type UiTask = {
 
 const statusStyles: Record<string, string> = {
   Completed: "bg-emerald-100 text-emerald-700",
-  Pending: "bg-slate-100 text-slate-800",
+  "In Progress": "bg-sky-100 text-sky-700",
+  Pending: "bg-amber-100 text-amber-700",
 };
 
 // priority concept removed — UI does not use priority
@@ -73,6 +74,8 @@ const [status, setStatus] = useState("both");
       status:
         typeof t.status === "string" && t.status.toLowerCase() === "completed"
           ? "Completed"
+          : typeof t.status === "string" && t.status.toLowerCase() === "in-progress"
+          ? "In Progress"
           : "Pending",
       due,
       assignees: assignees.length ? assignees : ["U"],
@@ -115,6 +118,7 @@ const [status, setStatus] = useState("both");
               <SelectContent>
                 <SelectItem value="both">All statuses</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="in-progress">In Progress</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
               </SelectContent>
             </Select>

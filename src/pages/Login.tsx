@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import type { LoginPayload } from "@/services/auth/types";
 import { login } from "@/services/auth";
 import { useMutation } from "@tanstack/react-query";
-import { useEffect } from "react";
 const schema = z.object({
   email: z.string().email("Enter a valid email"),
   password: z.string().min(6, "At least 6 characters"),
