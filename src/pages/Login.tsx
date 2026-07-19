@@ -59,10 +59,6 @@ export function LoginPage() {
               {errors.email && <p className="mt-1 text-xs text-destructive">{errors.email.message}</p>}
             </div>
             <div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="password">Password</Label>
-                <button type="button" className="text-xs text-primary hover:underline">Forgot?</button>
-              </div>
               <Input id="password" placeholder="Enter password" type="password" {...register("password")} className="mt-1.5" />
               {errors.password && <p className="mt-1 text-xs text-destructive">{errors.password.message}</p>}
             </div>
