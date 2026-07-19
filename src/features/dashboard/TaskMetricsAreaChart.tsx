@@ -91,7 +91,7 @@ export function TaskMetricsAreaChart({ data }: TaskMetricsAreaChartProps) {
           <p className="text-sm text-slate-500">Month-by-month created vs completed task comparison.</p>
         </div>
       </div>
-      <Chart options={options} series={series} type="area" height={360} />
+      <Chart options={options as any} series={series} type="area" height={360} />
     </div>
   );
 }

@@ -50,6 +50,13 @@ export function Dashboard() {
                   iconBgColor: "bg-green-100",
               },
               {
+                  label: "IN PROGRESS",
+                  value: metrics.inProgressTask,
+                  icon: "🚀",
+                  bgColor: "bg-indigo-50",
+                  iconBgColor: "bg-indigo-100",
+              },
+              {
                   label: "PENDING",
                   value: metrics.pendingTask,
                   icon: "⏱",
@@ -68,7 +75,7 @@ export function Dashboard() {
 
     return (
         <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
                 {metricsLoading && (
                     <div className="col-span-full">
                         <SectionLoader />

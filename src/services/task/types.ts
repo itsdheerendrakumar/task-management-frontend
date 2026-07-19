@@ -1,7 +1,7 @@
 import type { ApiResponse } from "@/utils/response";
 
 export interface TaskParticipant {
-  user_id: number;
+  user_id: string;
   role: "admin" | "projectManager" | "client" | "member";
 }
 
