@@ -4,4 +4,5 @@ export const queryKeys = {
     selectUserListing: "selectUserListing",
     activity: "activity",
     messageListing: "messageListing",
-}
+    messages: "messages",
+}

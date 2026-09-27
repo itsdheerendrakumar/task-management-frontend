@@ -1,52 +1,17 @@
-import { Paperclip, Send, MoreHorizontal } from "lucide-react";
+import { Paperclip, Send, MoreHorizontal, MessageSquare, AlertCircle, RefreshCw, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { EditGroupDialog } from "./EditGroupDialog";
 import type { ChatListing } from "@/services/message/types";
-
-interface Message {
-  id: string;
-  content: string;
-  senderId: "me" | "other";
-  timestamp: string;
-}
-
-// Mock messages for demonstration
-const MOCK_MESSAGES: Message[] = [
-  {
-    id: "1",
-    content: "Hey, how are you doing?",
-    senderId: "other",
-    timestamp: "10:00 AM",
-  },
-  {
-    id: "2",
-    content: "I'm doing well! Just working on the new feature.",
-    senderId: "me",
-    timestamp: "10:02 AM",
-  },
-  {
-    id: "3",
-    content: "That sounds great. Do you need any help?",
-    senderId: "other",
-    timestamp: "10:05 AM",
-  },
-  {
-    id: "4",
-    content: "Maybe later, I'll let you know. Thanks!",
-    senderId: "me",
-    timestamp: "10:06 AM",
-  },
-  {
-    id: "5",
-    content: "Alright, good luck!",
-    senderId: "other",
-    timestamp: "10:10 AM",
-  },
-];
+import { getMessagesByChatId, createMessage } from "@/services/message";
+import { useGetProfile } from "@/hooks/useGetProfile";
+import { socket } from "@/socket";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { queryKeys } from "@/constants/query-keys";
+import { toast } from "sonner";
 
 interface ChatAreaProps {
   activeChatId: string | null;
@@ -55,25 +20,60 @@ interface ChatAreaProps {
 
 export function ChatArea({ activeChatId, activeChat }: ChatAreaProps) {
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Message[]>(MOCK_MESSAGES);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  const queryClient = useQueryClient();
+  const { profileQuery } = useGetProfile();
+  const currentUserId = profileQuery?.data?.data?.id;
+
+  const messagesQuery = useQuery({
+    queryKey: [queryKeys.messages, activeChatId],
+    queryFn: () => getMessagesByChatId(activeChatId!),
+    enabled: Boolean(activeChatId),
+    refetchOnWindowFocus: false,
+  });
+  const messages = messagesQuery.data?.data || [];
+
+  const createMessageMutation = useMutation({
+    mutationFn: createMessage,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: [queryKeys.messages, activeChatId],
+      });
+
+      socket.emit("message", { chatId: activeChatId })
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Failed to send message");
+    },
+  });
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, activeChatId]);
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim()) return;
+    if (!message.trim() || !activeChatId || createMessageMutation.isPending) return;
 
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      content: message,
-      senderId: "me",
-      timestamp: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
-
-    setMessages([...messages, newMessage]);
+    const trimmedContent = message.trim();
     setMessage("");
+
+    createMessageMutation.mutate({
+      chat_id: activeChatId,
+      content: trimmedContent,
+    });
+  };
+
+  const formatMessageTime = (dateString?: string) => {
+    if (!dateString) return "";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "";
+    return date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
   };
 
   if (!activeChatId) {
@@ -107,30 +107,34 @@ export function ChatArea({ activeChatId, activeChat }: ChatAreaProps) {
     );
   }
 
+  const chatName = activeChat?.name || `Chat ${activeChatId.slice(-4)}`;
+  const initials = chatName ? chatName.substring(0, 2).toUpperCase() : "SC";
+  const isGroup = activeChat?.type === "group";
+
   return (
     <div className="flex h-full flex-1 flex-col overflow-hidden rounded-lg border bg-card shadow-soft">
       {/* Chat Header */}
       <div className="flex items-center justify-between border-b p-4 shadow-sm">
         <div className="flex items-center gap-3">
           <Avatar className="size-10 border border-border/50">
-            <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${activeChat?.chat_id?.name || activeChat?.name || 'SelectedChat'}`} />
-            <AvatarFallback>{(activeChat?.chat_id?.name || activeChat?.name) ? (activeChat?.chat_id?.name || activeChat?.name)?.substring(0, 2).toUpperCase() : 'SC'}</AvatarFallback>
+            <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${chatName}`} />
+            <AvatarFallback>{initials}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
             <span className="font-semibold text-foreground">
-              {activeChat?.chat_id?.name || activeChat?.name || `Chat ${activeChatId.slice(-4)}`}
+              {chatName}
             </span>
             <span className="text-xs text-success">
-              {(activeChat?.chat_id?.type || activeChat?.type) === 'group' 
-                ? `${activeChat?.participants?.length || 0} participants` 
+              {isGroup
+                ? `${activeChat?.participants?.length || 0} participants`
                 : 'Online'}
             </span>
           </div>
         </div>
-        
-        {(activeChat?.chat_id?.type || activeChat?.type) === "group" && (
-          <Button 
-            variant="ghost" 
+
+        {isGroup && (
+          <Button
+            variant="ghost"
             size="icon"
             onClick={() => setIsEditDialogOpen(true)}
             title="Group Info"
@@ -141,7 +145,7 @@ export function ChatArea({ activeChatId, activeChat }: ChatAreaProps) {
       </div>
 
       {activeChat && (
-        <EditGroupDialog 
+        <EditGroupDialog
           chat={activeChat}
           isOpen={isEditDialogOpen}
           onClose={() => setIsEditDialogOpen(false)}
@@ -150,43 +154,99 @@ export function ChatArea({ activeChatId, activeChat }: ChatAreaProps) {
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-4 bg-background/50">
-        {messages.map((msg) => {
-          const isMe = msg.senderId === "me";
-          return (
-            <div
-              key={msg.id}
-              className={cn(
-                "flex w-full items-end gap-2",
-                isMe ? "justify-end" : "justify-start"
-              )}
+        {messagesQuery.isLoading ? (
+          <div className="flex flex-col gap-4 py-4">
+            <div className="flex items-end gap-2 justify-start">
+              <div className="size-8 rounded-full bg-muted animate-pulse" />
+              <div className="h-14 w-48 rounded-2xl rounded-bl-sm bg-muted/60 animate-pulse" />
+            </div>
+            <div className="flex items-end gap-2 justify-end">
+              <div className="h-10 w-40 rounded-2xl rounded-br-sm bg-primary/20 animate-pulse" />
+            </div>
+            <div className="flex items-end gap-2 justify-start">
+              <div className="size-8 rounded-full bg-muted animate-pulse" />
+              <div className="h-16 w-60 rounded-2xl rounded-bl-sm bg-muted/60 animate-pulse" />
+            </div>
+            <div className="flex items-end gap-2 justify-end">
+              <div className="h-12 w-52 rounded-2xl rounded-br-sm bg-primary/20 animate-pulse" />
+            </div>
+          </div>
+        ) : messagesQuery.isError ? (
+          <div className="flex h-full flex-col items-center justify-center p-6 text-center text-muted-foreground gap-3">
+            <div className="flex size-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
+              <AlertCircle className="size-6" />
+            </div>
+            <p className="text-sm font-medium text-destructive">
+              Failed to load messages
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => messagesQuery.refetch()}
+              className="gap-2 text-xs"
             >
-              {!isMe && (
-                <Avatar className="size-8 shrink-0">
-                  <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=SelectedChat`} />
-                  <AvatarFallback>SC</AvatarFallback>
-                </Avatar>
-              )}
+              <RefreshCw className="size-3.5" /> Retry
+            </Button>
+          </div>
+        ) : messages.length === 0 ? (
+          <div className="flex h-full flex-col items-center justify-center p-6 text-center text-muted-foreground">
+            <div className="flex size-14 items-center justify-center rounded-full bg-muted/60 text-muted-foreground/80 mb-3">
+              <MessageSquare className="size-7" />
+            </div>
+            <p className="font-medium text-foreground">No messages yet</p>
+            <p className="text-xs text-muted-foreground mt-1 max-w-xs">
+              Be the first to say hello and start this conversation!
+            </p>
+          </div>
+        ) : (
+          messages.map((msg) => {
+            const senderId = typeof msg.sender_id === "object" ? msg.sender_id?.id : msg.sender_id;
+            const isMe = Boolean(currentUserId && String(senderId) === String(currentUserId));
+            const senderName = typeof msg.sender_id === "object" ? msg.sender_id?.name : "User";
+            const senderInitials = senderName ? senderName.substring(0, 2).toUpperCase() : "U";
+
+            return (
               <div
+                key={msg._id}
                 className={cn(
-                  "relative max-w-[75%] rounded-2xl px-4 py-2 text-sm shadow-sm",
-                  isMe
-                    ? "rounded-br-sm bg-primary text-primary-foreground"
-                    : "rounded-bl-sm bg-card border text-foreground"
+                  "flex w-full items-end gap-2",
+                  isMe ? "justify-end" : "justify-start"
                 )}
               >
-                <p>{msg.content}</p>
-                <span
+                {!isMe && (
+                  <Avatar className="size-8 shrink-0">
+                    <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${senderName}`} />
+                    <AvatarFallback>{senderInitials}</AvatarFallback>
+                  </Avatar>
+                )}
+                <div
                   className={cn(
-                    "mt-1 block text-[10px] opacity-70",
-                    isMe ? "text-right text-primary-foreground/80" : "text-muted-foreground"
+                    "relative max-w-[75%] rounded-2xl px-4 py-2 text-sm shadow-sm",
+                    isMe
+                      ? "rounded-br-sm bg-primary text-primary-foreground"
+                      : "rounded-bl-sm bg-card border text-foreground"
                   )}
                 >
-                  {msg.timestamp}
-                </span>
+                  {!isMe && isGroup && (
+                    <span className="mb-0.5 block text-[11px] font-semibold text-primary/80">
+                      {senderName}
+                    </span>
+                  )}
+                  <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                  <span
+                    className={cn(
+                      "mt-1 block text-[10px] opacity-70",
+                      isMe ? "text-right text-primary-foreground/80" : "text-muted-foreground"
+                    )}
+                  >
+                    {formatMessageTime(msg.createdAt)}
+                  </span>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        )}
+        <div ref={messagesEndRef} />
       </div>
 
       {/* Input Area */}
@@ -209,13 +269,18 @@ export function ChatArea({ activeChatId, activeChat }: ChatAreaProps) {
           <Button
             type="submit"
             size="icon"
-            disabled={!message.trim()}
+            disabled={!message.trim() || createMessageMutation.isPending}
             className="shrink-0 rounded-full h-11 w-11 shadow-md transition-transform active:scale-95"
           >
-            <Send className="size-5" />
+            {createMessageMutation.isPending ? (
+              <Loader2 className="size-5 animate-spin" />
+            ) : (
+              <Send className="size-5" />
+            )}
           </Button>
         </form>
       </div>
     </div>
   );
 }
+

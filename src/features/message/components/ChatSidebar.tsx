@@ -48,14 +48,14 @@ export function ChatSidebar({
         ) : chats && chats.length > 0 ? (
           <div className="flex flex-col gap-1">
             {chats.map((chatItem) => {
-              const isActive = activeChatId === chatItem.chat_id?._id;
-              const chatName = chatItem.chat_id?.name || "Unknown Chat";
+              const isActive = activeChatId === chatItem._id;
+              const chatName = chatItem.name || "Unknown Chat";
               const initials = chatName.substring(0, 2).toUpperCase();
 
               return (
                 <button
                   key={chatItem._id}
-                  onClick={() => onSelectChat(chatItem.chat_id?._id || chatItem._id)}
+                  onClick={() => onSelectChat(chatItem._id)}
                   className={cn(
                     "flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors",
                     isActive
@@ -78,7 +78,7 @@ export function ChatSidebar({
                       </span>
                     </div>
                     <span className="truncate text-sm text-muted-foreground">
-                      {chatItem.chat_id?.type === "group" ? "Group chat" : "Private chat"}
+                      {chatItem.type === "group" ? "Group chat" : "Private chat"}
                     </span>
                   </div>
                 </button>

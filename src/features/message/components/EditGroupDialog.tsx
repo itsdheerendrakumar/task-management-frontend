@@ -25,12 +25,12 @@ interface EditGroupDialogProps {
 }
 
 export function EditGroupDialog({ chat, isOpen, onClose }: EditGroupDialogProps) {
-  const [name, setName] = useState(chat.chat_id?.name || chat.name || "");
+  const [name, setName] = useState(chat.name || "");
   const [selectedParticipants, setSelectedParticipants] = useState<{ value: string; label: string }[]>([]);
 
   useEffect(() => {
     if (isOpen) {
-      setName(chat.chat_id?.name || chat.name || "");
+      setName(chat.name || "");
       setSelectedParticipants([]);
     }
   }, [isOpen, chat]);
@@ -57,7 +57,7 @@ export function EditGroupDialog({ chat, isOpen, onClose }: EditGroupDialogProps)
 
   // Filter out existing participants
   const existingParticipantIds = new Set(chat.participants?.map((p) => p.id) || []);
-  const createdBy = chat.chat_id?.created_by || chat.created_by;
+  const createdBy = chat.created_by;
   if (createdBy) {
     existingParticipantIds.add(createdBy);
   }
@@ -82,7 +82,7 @@ export function EditGroupDialog({ chat, isOpen, onClose }: EditGroupDialogProps)
     );
 
     mutation.mutate({
-      chat_id: chat.chat_id?._id || chat._id,
+      chat_id: chat._id,
       name,
       chatParticipants: newParticipants,
     });
