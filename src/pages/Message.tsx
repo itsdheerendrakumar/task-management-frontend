@@ -2,13 +2,14 @@ import { useEffect, useState } from "react";
 import { queryKeys } from "@/constants/query-keys";
 import { useGetProfile } from "@/hooks/useGetProfile";
 import { getChatListing } from "@/services/message";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ChatSidebar } from "@/features/message/components/ChatSidebar";
 import { ChatArea } from "@/features/message/components/ChatArea";
 import { socket } from "@/socket";
 
 export default function Message() {
   const { profileQuery } = useGetProfile();
+  const queryClient = useQueryClient();
   const messageListingQuery = useQuery({
     queryKey: [queryKeys.messageListing, profileQuery?.data?.data?.id],
     queryFn: getChatListing,
@@ -37,12 +38,7 @@ export default function Message() {
 
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
-    const handleIncomingMessage = (data: any) => {
-      console.log("called", data);
-      messageListingQuery.refetch();
-    };
 
-    socket.on("message", handleIncomingMessage);
 
     if (messageListingQuery.data?.data?.length) {
       messageListingQuery.data?.data?.forEach((chat) => {
@@ -53,11 +49,26 @@ export default function Message() {
     return () => {
       socket.off("connect", handleConnect);
       socket.off("disconnect", handleDisconnect);
-      socket.off("message", handleIncomingMessage);
     };
   }, [messageListingQuery.data?.data]);
 
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleIncomingMessage = (data: any) => {
+      console.log("called", data);
+      if (data?.chatId === activeChatId) {
+        console.log("called condition")
+        queryClient.invalidateQueries({ queryKey: [queryKeys.messages, activeChatId] });
+      }
+    };
+
+    socket.on("message", handleIncomingMessage);
+    return () => {
+      socket.off("message", handleIncomingMessage);
+    };
+  }, [activeChatId])
+
   const activeChat = messageListingQuery.data?.data?.find(c => (c?._id) === activeChatId) || null;
 
   return (
