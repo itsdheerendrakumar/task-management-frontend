@@ -1,4 +1,4 @@
-import { Paperclip, Send, MoreHorizontal, MessageSquare, AlertCircle, RefreshCw, Loader2 } from "lucide-react";
+import { Paperclip, Send, MoreHorizontal, MessageSquare, AlertCircle, RefreshCw, Loader2, ArrowLeft } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,12 +16,14 @@ import { toast } from "sonner";
 interface ChatAreaProps {
   activeChatId: string | null;
   activeChat?: ChatListing | null;
+  onBack?: () => void;
 }
 
-export function ChatArea({ activeChatId, activeChat }: ChatAreaProps) {
+export function ChatArea({ activeChatId, activeChat, onBack }: ChatAreaProps) {
   const [message, setMessage] = useState("");
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+  const prevChatIdRef = useRef<string | null>(null);
 
   const queryClient = useQueryClient();
   const { profileQuery } = useGetProfile();
@@ -50,7 +52,18 @@ export function ChatArea({ activeChatId, activeChat }: ChatAreaProps) {
   });
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const container = messagesContainerRef.current;
+    if (!container) return;
+
+    if (prevChatIdRef.current !== activeChatId) {
+      prevChatIdRef.current = activeChatId;
+      container.scrollTop = container.scrollHeight;
+    } else {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth",
+      });
+    }
   }, [messages, activeChatId]);
 
   const handleSendMessage = (e: React.FormEvent) => {
@@ -78,7 +91,7 @@ export function ChatArea({ activeChatId, activeChat }: ChatAreaProps) {
 
   if (!activeChatId) {
     return (
-      <div className="hidden flex-1 items-center justify-center rounded-lg border bg-card shadow-soft sm:flex">
+      <div className="hidden h-full flex-1 items-center justify-center rounded-lg border bg-card shadow-soft sm:flex">
         <div className="flex flex-col items-center gap-4 text-center">
           <div className="flex size-20 items-center justify-center rounded-full bg-primary/10 text-primary">
             <svg
@@ -112,10 +125,21 @@ export function ChatArea({ activeChatId, activeChat }: ChatAreaProps) {
   const isGroup = activeChat?.type === "group";
 
   return (
-    <div className="flex h-full flex-1 flex-col overflow-hidden rounded-lg border bg-card shadow-soft">
+    <div className="flex h-full flex-1 flex-col overflow-hidden rounded-lg border bg-card shadow-soft min-h-0">
       {/* Chat Header */}
-      <div className="flex items-center justify-between border-b p-4 shadow-sm">
+      <div className="flex items-center justify-between border-b p-4 shadow-sm shrink-0">
         <div className="flex items-center gap-3">
+          {onBack && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="sm:hidden -ml-2 text-muted-foreground hover:text-foreground"
+              onClick={onBack}
+              title="Back to chats"
+            >
+              <ArrowLeft className="size-5" />
+            </Button>
+          )}
           <Avatar className="size-10 border border-border/50">
             <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${chatName}`} />
             <AvatarFallback>{initials}</AvatarFallback>
@@ -153,7 +177,10 @@ export function ChatArea({ activeChatId, activeChat }: ChatAreaProps) {
       )}
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto scrollbar-thin p-4 space-y-4 bg-background/50">
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto overscroll-contain scrollbar-thin p-4 space-y-4 bg-background/50 min-h-0"
+      >
         {messagesQuery.isLoading ? (
           <div className="flex flex-col gap-4 py-4">
             <div className="flex items-end gap-2 justify-start">
@@ -246,11 +273,10 @@ export function ChatArea({ activeChatId, activeChat }: ChatAreaProps) {
             );
           })
         )}
-        <div ref={messagesEndRef} />
       </div>
 
       {/* Input Area */}
-      <div className="border-t bg-card p-4">
+      <div className="border-t bg-card p-4 shrink-0">
         <form onSubmit={handleSendMessage} className="flex items-center gap-2">
           <Button
             type="button"

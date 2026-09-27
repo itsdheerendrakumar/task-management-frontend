@@ -21,8 +21,8 @@ export function ChatSidebar({
   onSelectChat,
 }: ChatSidebarProps) {
   return (
-    <div className="flex h-full w-full flex-col overflow-hidden rounded-lg border bg-card shadow-soft sm:w-80 md:w-96">
-      <div className="flex flex-col gap-4 border-b p-4">
+    <div className="flex h-full w-full flex-col overflow-hidden rounded-lg border bg-card shadow-soft">
+      <div className="flex flex-col gap-4 border-b p-4 shrink-0">
         <h2 className="text-xl font-semibold text-foreground">Messages</h2>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -32,7 +32,7 @@ export function ChatSidebar({
           />
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto scrollbar-thin p-2">
+      <div className="flex-1 overflow-y-auto overscroll-contain scrollbar-thin p-2 min-h-0">
         {isLoading ? (
           <div className="flex flex-col gap-2 p-2">
             {[...Array(5)].map((_, i) => (

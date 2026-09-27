@@ -14,6 +14,18 @@ export default function Message() {
     queryFn: getChatListing,
   });
 
+  // Lock main container scrolling strictly while on the Message page
+  useEffect(() => {
+    const mainEl = document.querySelector("main");
+    if (mainEl) {
+      const prevOverflow = mainEl.style.overflow;
+      mainEl.style.overflow = "hidden";
+      return () => {
+        mainEl.style.overflow = prevOverflow;
+      };
+    }
+  }, []);
+
   useEffect(() => {
     const handleConnect = () => {
       console.log(socket.id);
@@ -25,7 +37,7 @@ export default function Message() {
 
     socket.on("connect", handleConnect);
     socket.on("disconnect", handleDisconnect);
-    const handleIncomingMessage = (data) => {
+    const handleIncomingMessage = (data: any) => {
       console.log("called", data);
       messageListingQuery.refetch();
     };
@@ -49,8 +61,8 @@ export default function Message() {
   const activeChat = messageListingQuery.data?.data?.find(c => (c?._id) === activeChatId) || null;
 
   return (
-    <div className="flex h-[calc(100vh-100px)] w-full gap-4 overflow-hidden">
-      <div className={`${activeChatId ? 'hidden sm:block' : 'block'} w-full sm:w-80 md:w-96 shrink-0`}>
+    <div className="flex h-[calc(100dvh-112px)] max-h-[calc(100dvh-112px)] w-full gap-4 overflow-hidden">
+      <div className={`${activeChatId ? 'hidden sm:flex' : 'flex'} flex-col h-full w-full sm:w-80 md:w-96 shrink-0 min-h-0 overflow-hidden`}>
         <ChatSidebar
           chats={messageListingQuery.data?.data}
           isLoading={messageListingQuery.isLoading}
@@ -58,8 +70,12 @@ export default function Message() {
           onSelectChat={setActiveChatId}
         />
       </div>
-      <div className={`${!activeChatId ? 'hidden sm:flex' : 'flex'} flex-1 min-w-0`}>
-        <ChatArea activeChatId={activeChatId} activeChat={activeChat} />
+      <div className={`${!activeChatId ? 'hidden sm:flex' : 'flex'} flex-col flex-1 min-w-0 min-h-0 h-full overflow-hidden`}>
+        <ChatArea
+          activeChatId={activeChatId}
+          activeChat={activeChat}
+          onBack={() => setActiveChatId(null)}
+        />
       </div>
     </div>
   );
