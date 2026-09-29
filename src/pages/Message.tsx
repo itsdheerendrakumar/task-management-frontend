@@ -2,14 +2,13 @@ import { useEffect, useState } from "react";
 import { queryKeys } from "@/constants/query-keys";
 import { useGetProfile } from "@/hooks/useGetProfile";
 import { getChatListing } from "@/services/message";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { ChatSidebar } from "@/features/message/components/ChatSidebar";
 import { ChatArea } from "@/features/message/components/ChatArea";
 import { socket } from "@/socket";
 
 export default function Message() {
   const { profileQuery } = useGetProfile();
-  const queryClient = useQueryClient();
   const messageListingQuery = useQuery({
     queryKey: [queryKeys.messageListing, profileQuery?.data?.data?.id],
     queryFn: getChatListing,
