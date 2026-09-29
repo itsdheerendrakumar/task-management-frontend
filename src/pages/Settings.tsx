@@ -13,6 +13,7 @@ import { useGetProfile } from '@/hooks/useGetProfile'
 import { changePassword, updateProfile } from '@/services/user'
 import { queryKeys } from '@/constants/query-keys'
 import { Eye, EyeOff } from 'lucide-react'
+import { AxiosError } from 'axios'
 
 const profileSchema = z.object({
   name: z.string().min(2, 'Please enter your full name'),
@@ -103,7 +104,7 @@ export default function Settings() {
       toast.success('Profile photo updated successfully.')
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : 'Unable to update profile photo.'
+      const message = error instanceof AxiosError ? error.response?.data?.message : 'Unable to update profile photo.'
       toast.error(message)
     },
   })
