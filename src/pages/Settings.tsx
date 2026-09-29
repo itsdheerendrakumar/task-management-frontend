@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label'
 import { useGetProfile } from '@/hooks/useGetProfile'
 import { changePassword, updateProfile } from '@/services/user'
 import { queryKeys } from '@/constants/query-keys'
+import { Eye, EyeOff } from 'lucide-react'
 
 const profileSchema = z.object({
   name: z.string().min(2, 'Please enter your full name'),
@@ -38,6 +39,10 @@ export default function Settings() {
 
   const [profileImageFile, setProfileImageFile] = useState<File | null>(null)
   const [localPreviewUrl, setLocalPreviewUrl] = useState<string | null>(null)
+
+  const [showCurrentPassword, setShowCurrentPassword] = useState(false)
+  const [showNewPassword, setShowNewPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
 
   const profileForm = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
@@ -108,6 +113,9 @@ export default function Settings() {
       changePassword(payload),
     onSuccess: () => {
       passwordForm.reset()
+      setShowCurrentPassword(false)
+      setShowNewPassword(false)
+      setShowConfirmPassword(false)
       toast.success('Password updated successfully.')
     },
     onError: (error) => {
@@ -262,12 +270,28 @@ export default function Settings() {
               <div className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="currentPassword">Current password</Label>
-                  <Input
-                    id="currentPassword"
-                    type="password"
-                    className="h-12 rounded-xl"
-                    {...passwordForm.register('currentPassword')}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="currentPassword"
+                      type={showCurrentPassword ? 'text' : 'password'}
+                      className="h-12 rounded-xl pr-10"
+                      {...passwordForm.register('currentPassword')}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setShowCurrentPassword((prev) => !prev)}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                      aria-label={showCurrentPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showCurrentPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                   {passwordForm.formState.errors.currentPassword && (
                     <p className="text-sm text-destructive">
                       {passwordForm.formState.errors.currentPassword.message}
@@ -277,12 +301,28 @@ export default function Settings() {
 
                 <div className="space-y-2">
                   <Label htmlFor="newPassword">New password</Label>
-                  <Input
-                    id="newPassword"
-                    type="password"
-                    className="h-12 rounded-xl"
-                    {...passwordForm.register('newPassword')}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="newPassword"
+                      type={showNewPassword ? 'text' : 'password'}
+                      className="h-12 rounded-xl pr-10"
+                      {...passwordForm.register('newPassword')}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setShowNewPassword((prev) => !prev)}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                      aria-label={showNewPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showNewPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                   {passwordForm.formState.errors.newPassword && (
                     <p className="text-sm text-destructive">
                       {passwordForm.formState.errors.newPassword.message}
@@ -292,12 +332,28 @@ export default function Settings() {
 
                 <div className="space-y-2">
                   <Label htmlFor="confirmNewPassword">Confirm new password</Label>
-                  <Input
-                    id="confirmNewPassword"
-                    type="password"
-                    className="h-12 rounded-xl"
-                    {...passwordForm.register('confirmNewPassword')}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="confirmNewPassword"
+                      type={showConfirmPassword ? 'text' : 'password'}
+                      className="h-12 rounded-xl pr-10"
+                      {...passwordForm.register('confirmNewPassword')}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setShowConfirmPassword((prev) => !prev)}
+                      className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
                   {passwordForm.formState.errors.confirmNewPassword && (
                     <p className="text-sm text-destructive">
                       {passwordForm.formState.errors.confirmNewPassword.message}
