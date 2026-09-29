@@ -120,7 +120,7 @@ export default function Settings() {
       toast.success('Password updated successfully.')
     },
     onError: (error) => {
-      const message = error instanceof Error ? error.message : 'Unable to update password.'
+      const message = error instanceof AxiosError ? error.response?.data?.message : 'Unable to update password.'
       toast.error(message)
     },
   })
