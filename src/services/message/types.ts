@@ -27,12 +27,17 @@ export interface MessageSender {
 export interface ChatMessage {
   _id: string;
   chat_id: string;
-  sender_id: string | MessageSender;
+  sender_id: MessageSender;
   content: string;
   type: "text" | string;
   createdAt: string;
   updatedAt: string;
   __v?: number;
+}
+
+export interface MessageEventData {
+  chatId: string;
+  messageId: string
 }
 
 export type GetMessagesResponse = ApiResponse<ChatMessage[]>;

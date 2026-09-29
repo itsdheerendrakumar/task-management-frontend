@@ -5,11 +5,11 @@ import { Input } from "@/components/ui/input";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { EditGroupDialog } from "./EditGroupDialog";
-import type { ChatListing } from "@/services/message/types";
-import { getMessagesByChatId, createMessage } from "@/services/message";
+import type { ChatListing, ChatMessage, MessageEventData } from "@/services/message/types";
+import { getMessagesByChatId, createMessage, getNewMessage } from "@/services/message";
 import { useGetProfile } from "@/hooks/useGetProfile";
 import { socket } from "@/socket";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryKeys } from "@/constants/query-keys";
 import { toast } from "sonner";
 
@@ -21,11 +21,11 @@ interface ChatAreaProps {
 
 export function ChatArea({ activeChatId, activeChat, onBack }: ChatAreaProps) {
   const [message, setMessage] = useState("");
+  const [messageListings, setMessageListings] = useState<ChatMessage[]>([]);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
   const prevChatIdRef = useRef<string | null>(null);
 
-  const queryClient = useQueryClient();
   const { profileQuery } = useGetProfile();
   const currentUserId = profileQuery?.data?.data?.id;
 
@@ -35,21 +35,26 @@ export function ChatArea({ activeChatId, activeChat, onBack }: ChatAreaProps) {
     enabled: Boolean(activeChatId),
     refetchOnWindowFocus: false,
   });
-  const messages = messagesQuery.data?.data || [];
+
+  useEffect(() => {
+    if(messagesQuery.data?.data?.length! >= 0)
+      setMessageListings(messagesQuery.data?.data ?? []);
+  }, [messagesQuery.data?.data, setMessageListings])
 
   const createMessageMutation = useMutation({
     mutationFn: createMessage,
-    onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: [queryKeys.messages, activeChatId],
-      });
-
-      socket.emit("message", { chatId: activeChatId })
-    },
     onError: (error: any) => {
       toast.error(error?.response?.data?.message || "Failed to send message");
     },
   });
+
+  const newMessageMutation = useMutation({
+    mutationFn: ({chatId, messageId}: {chatId: string, messageId: string}) => getNewMessage(chatId, messageId),
+    onSuccess: (response) => {
+      if(response?.data)
+        setMessageListings(pre => [...pre, response?.data as ChatMessage])
+    }
+  })
 
   useEffect(() => {
     const container = messagesContainerRef.current;
@@ -64,19 +69,38 @@ export function ChatArea({ activeChatId, activeChat, onBack }: ChatAreaProps) {
         behavior: "smooth",
       });
     }
-  }, [messages, activeChatId]);
+  }, [messageListings, activeChatId]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  useEffect(() => {
+    const handleIncomingMessage = (data: MessageEventData) => {
+      newMessageMutation.mutate({chatId: data.chatId, messageId: data.messageId})
+    };
+
+    socket.on("message", handleIncomingMessage);
+    return () => {
+      socket.off("message", handleIncomingMessage);
+    };
+  }, [activeChatId])
+
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim() || !activeChatId || createMessageMutation.isPending) return;
 
     const trimmedContent = message.trim();
     setMessage("");
-
-    createMessageMutation.mutate({
+    try {
+      const response = await createMessageMutation.mutateAsync({
       chat_id: activeChatId,
       content: trimmedContent,
     });
+    if(response?.data) {
+      setMessageListings((prevMessages) => [...prevMessages, response?.data as ChatMessage]);
+      socket.emit("message", { chatId: activeChatId, messageId: response?.data?._id });
+    }
+    } catch (error) {
+      
+    }
+    
   };
 
   const formatMessageTime = (dateString?: string) => {
@@ -215,7 +239,7 @@ export function ChatArea({ activeChatId, activeChat, onBack }: ChatAreaProps) {
               <RefreshCw className="size-3.5" /> Retry
             </Button>
           </div>
-        ) : messages.length === 0 ? (
+        ) : messageListings.length === 0 ? (
           <div className="flex h-full flex-col items-center justify-center p-6 text-center text-muted-foreground">
             <div className="flex size-14 items-center justify-center rounded-full bg-muted/60 text-muted-foreground/80 mb-3">
               <MessageSquare className="size-7" />
@@ -226,7 +250,7 @@ export function ChatArea({ activeChatId, activeChat, onBack }: ChatAreaProps) {
             </p>
           </div>
         ) : (
-          messages.map((msg) => {
+          messageListings.map((msg) => {
             const senderId = typeof msg.sender_id === "object" ? msg.sender_id?.id : msg.sender_id;
             const isMe = Boolean(currentUserId && String(senderId) === String(currentUserId));
             const senderName = typeof msg.sender_id === "object" ? msg.sender_id?.name : "User";

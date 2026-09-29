@@ -59,7 +59,7 @@ export default function Message() {
       console.log("called", data);
       if (data?.chatId === activeChatId) {
         console.log("called condition")
-        queryClient.invalidateQueries({ queryKey: [queryKeys.messages, activeChatId] });
+        // queryClient.invalidateQueries({ queryKey: [queryKeys.messages, activeChatId] });
       }
     };
 
