@@ -282,8 +282,9 @@ export default function Settings() {
                       type="button"
                       variant="ghost"
                       size="icon"
+                      onMouseDown={(e) => e.preventDefault()}
                       onClick={() => setShowCurrentPassword((prev) => !prev)}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                      className="absolute right-1.5 inset-y-0 my-auto size-8 text-muted-foreground hover:text-foreground active:not-aria-[haspopup]:translate-y-0 cursor-pointer"
                       aria-label={showCurrentPassword ? 'Hide password' : 'Show password'}
                     >
                       {showCurrentPassword ? (
@@ -313,8 +314,9 @@ export default function Settings() {
                       type="button"
                       variant="ghost"
                       size="icon"
+                      onMouseDown={(e) => e.preventDefault()}
                       onClick={() => setShowNewPassword((prev) => !prev)}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                      className="absolute right-1.5 inset-y-0 my-auto size-8 text-muted-foreground hover:text-foreground active:not-aria-[haspopup]:translate-y-0 cursor-pointer"
                       aria-label={showNewPassword ? 'Hide password' : 'Show password'}
                     >
                       {showNewPassword ? (
@@ -344,8 +346,9 @@ export default function Settings() {
                       type="button"
                       variant="ghost"
                       size="icon"
+                      onMouseDown={(e) => e.preventDefault()}
                       onClick={() => setShowConfirmPassword((prev) => !prev)}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                      className="absolute right-1.5 inset-y-0 my-auto size-8 text-muted-foreground hover:text-foreground active:not-aria-[haspopup]:translate-y-0 cursor-pointer"
                       aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                     >
                       {showConfirmPassword ? (
