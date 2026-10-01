@@ -1,6 +1,7 @@
 import { Search } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -46,45 +47,58 @@ export function ChatSidebar({
             ))}
           </div>
         ) : chats && chats.length > 0 ? (
-          <div className="flex flex-col gap-1">
-            {chats.map((chatItem) => {
-              const isActive = activeChatId === chatItem._id;
-              const chatName = chatItem.name || "Unknown Chat";
-              const initials = chatName.substring(0, 2).toUpperCase();
+          <TooltipProvider delayDuration={0}>
+            <div className="flex flex-col gap-1">
+              {chats.map((chatItem) => {
+                const isActive = activeChatId === chatItem._id;
+                const chatName = chatItem.name || "Unknown Chat";
+                const initials = chatName.substring(0, 2).toUpperCase();
+                const lastMessage = chatItem.lastMessage?.content?.trim() || "No messages yet";
+                const lastMessageDate = chatItem.lastMessage?.createdAt
+                  ? new Date(chatItem.lastMessage.createdAt).toLocaleDateString()
+                  : new Date(chatItem.createdAt).toLocaleDateString();
 
-              return (
-                <button
-                  key={chatItem._id}
-                  onClick={() => onSelectChat(chatItem._id)}
-                  className={cn(
-                    "flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors",
-                    isActive
-                      ? "bg-primary/10 text-primary"
-                      : "hover:bg-muted/50"
-                  )}
-                >
-                  <Avatar className="size-12 border border-border/50 shadow-sm">
-                    <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${chatName}`} />
-                    <AvatarFallback>{initials}</AvatarFallback>
-                  </Avatar>
-                  <div className="flex flex-1 flex-col overflow-hidden">
-                    <div className="flex items-center justify-between">
-                      <span className="truncate font-medium text-foreground">
-                        {chatName}
-                      </span>
-                      {/* Optional: Add a timestamp if available in future */}
-                      <span className="text-xs text-muted-foreground">
-                        {new Date(chatItem.createdAt).toLocaleDateString()}
-                      </span>
+                return (
+                  <button
+                    key={chatItem._id}
+                    onClick={() => onSelectChat(chatItem._id)}
+                    className={cn(
+                      "flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors",
+                      isActive
+                        ? "bg-primary/10 text-primary"
+                        : "hover:bg-muted/50"
+                    )}
+                  >
+                    <Avatar className="size-12 border border-border/50 shadow-sm">
+                      <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${chatName}`} />
+                      <AvatarFallback>{initials}</AvatarFallback>
+                    </Avatar>
+                    <div className="flex flex-1 flex-col overflow-hidden">
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="truncate font-medium text-foreground">
+                          {chatName}
+                        </span>
+                        <span className="text-xs text-muted-foreground">
+                          {lastMessageDate}
+                        </span>
+                      </div>
+
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span className="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm text-muted-foreground">
+                            {lastMessage}
+                          </span>
+                        </TooltipTrigger>
+                        <TooltipContent side="top" className="max-w-xs break-words whitespace-pre-wrap">
+                          {lastMessage}
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
-                    <span className="truncate text-sm text-muted-foreground">
-                      {chatItem.type === "group" ? "Group chat" : "Private chat"}
-                    </span>
-                  </div>
-                </button>
-              );
-            })}
-          </div>
+                  </button>
+                );
+              })}
+            </div>
+          </TooltipProvider>
         ) : (
           <div className="flex h-full flex-col items-center justify-center p-4 text-center text-muted-foreground">
             <p>No chats found</p>

@@ -6,6 +6,7 @@ export interface ChatListing {
   type?: "private" | "group";
   created_by?: string;
   participants: { name: string; id: string }[];
+  lastMessage: ChatMessage | null;
   __v?: number;
   createdAt: string;
   updatedAt: string;
@@ -27,7 +28,7 @@ export interface MessageSender {
 export interface ChatMessage {
   _id: string;
   chat_id: string;
-  sender_id: MessageSender;
+  sender_id: MessageSender | string;
   content: string;
   type: "text" | string;
   createdAt: string;

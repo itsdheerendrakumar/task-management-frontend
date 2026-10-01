@@ -6,13 +6,21 @@ import { useQuery } from "@tanstack/react-query";
 import { ChatSidebar } from "@/features/message/components/ChatSidebar";
 import { ChatArea } from "@/features/message/components/ChatArea";
 import { socket } from "@/socket";
+import type { ChatListing, ChatMessage } from "@/services/message/types";
 
 export default function Message() {
   const { profileQuery } = useGetProfile();
+  const [chats, setChats] = useState<ChatListing[]>([]);
   const messageListingQuery = useQuery({
     queryKey: [queryKeys.messageListing, profileQuery?.data?.data?.id],
     queryFn: getChatListing,
   });
+
+  useEffect(() => {
+    if (messageListingQuery.data?.data?.length) {
+      setChats(messageListingQuery.data?.data);
+    }
+  }, [messageListingQuery.data?.data]);
 
   // Lock main container scrolling strictly while on the Message page
   useEffect(() => {
@@ -54,12 +62,13 @@ export default function Message() {
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
 
   useEffect(() => {
-    const handleIncomingMessage = (data: any) => {
-      console.log("called", data);
-      if (data?.chatId === activeChatId) {
-        console.log("called condition")
-        // queryClient.invalidateQueries({ queryKey: [queryKeys.messages, activeChatId] });
-      }
+    const handleIncomingMessage = (data: ChatMessage) => {
+      setChats((prevChats) => prevChats.map((chat) => {
+        if (chat._id === data.chat_id) {
+          return { ...chat, lastMessage: data };
+        }
+        return chat;
+      }));
     };
 
     socket.on("message", handleIncomingMessage);
@@ -74,7 +83,7 @@ export default function Message() {
     <div className="flex h-[calc(100dvh-112px)] max-h-[calc(100dvh-112px)] w-full gap-4 overflow-hidden">
       <div className={`${activeChatId ? 'hidden sm:flex' : 'flex'} flex-col h-full w-full sm:w-80 md:w-96 shrink-0 min-h-0 overflow-hidden`}>
         <ChatSidebar
-          chats={messageListingQuery.data?.data}
+          chats={chats}
           isLoading={messageListingQuery.isLoading}
           activeChatId={activeChatId}
           onSelectChat={setActiveChatId}

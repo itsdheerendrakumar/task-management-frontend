@@ -27,8 +27,3 @@ export async function updateGroup(payload: UpdateGroupPayload) {
   return response.data;
 }
 
-export async function getNewMessage(chatId: string, messageId: string): Promise<CreateMessageResponse> {
-  const response = await api.get(`/message/${chatId}/${messageId}`);
-  return response.data;
-}
-

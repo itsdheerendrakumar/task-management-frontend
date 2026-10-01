@@ -5,8 +5,8 @@ import { Input } from "@/components/ui/input";
 import { useState, useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
 import { EditGroupDialog } from "./EditGroupDialog";
-import type { ChatListing, ChatMessage, MessageEventData } from "@/services/message/types";
-import { getMessagesByChatId, createMessage, getNewMessage } from "@/services/message";
+import type { ChatListing, ChatMessage } from "@/services/message/types";
+import { getMessagesByChatId, createMessage } from "@/services/message";
 import { useGetProfile } from "@/hooks/useGetProfile";
 import { socket } from "@/socket";
 import { useQuery, useMutation } from "@tanstack/react-query";
@@ -48,14 +48,6 @@ export function ChatArea({ activeChatId, activeChat, onBack }: ChatAreaProps) {
     },
   });
 
-  const newMessageMutation = useMutation({
-    mutationFn: ({chatId, messageId}: {chatId: string, messageId: string}) => getNewMessage(chatId, messageId),
-    onSuccess: (response) => {
-      if(response?.data)
-        setMessageListings(pre => [...pre, response?.data as ChatMessage])
-    }
-  })
-
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
@@ -72,8 +64,9 @@ export function ChatArea({ activeChatId, activeChat, onBack }: ChatAreaProps) {
   }, [messageListings, activeChatId]);
 
   useEffect(() => {
-    const handleIncomingMessage = (data: MessageEventData) => {
-      newMessageMutation.mutate({chatId: data.chatId, messageId: data.messageId})
+    const handleIncomingMessage = (data: ChatMessage) => {
+      if (data.chat_id === activeChatId)
+        setMessageListings((prevMessages) => [...prevMessages, data]);
     };
 
     socket.on("message", handleIncomingMessage);
@@ -95,7 +88,7 @@ export function ChatArea({ activeChatId, activeChat, onBack }: ChatAreaProps) {
     });
     if(response?.data) {
       setMessageListings((prevMessages) => [...prevMessages, response?.data as ChatMessage]);
-      socket.emit("message", { chatId: activeChatId, messageId: response?.data?._id });
+      socket.emit("message", response?.data);
     }
     } catch (error) {
       
