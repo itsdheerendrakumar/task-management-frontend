@@ -94,6 +94,14 @@ export default function Message() {
           activeChatId={activeChatId}
           activeChat={activeChat}
           onBack={() => setActiveChatId(null)}
+          handleLastMessage={(message: ChatMessage) => {
+            setChats((prevChats) => prevChats.map((chat) => {
+              if (chat._id === message.chat_id) {
+                return { ...chat, lastMessage: message };
+              }
+              return chat;
+            }))
+          }}
         />
       </div>
     </div>

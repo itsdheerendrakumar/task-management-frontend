@@ -17,9 +17,10 @@ interface ChatAreaProps {
   activeChatId: string | null;
   activeChat?: ChatListing | null;
   onBack?: () => void;
+  handleLastMessage: (message: ChatMessage) => void;
 }
 
-export function ChatArea({ activeChatId, activeChat, onBack }: ChatAreaProps) {
+export function ChatArea({ activeChatId, activeChat, onBack, handleLastMessage }: ChatAreaProps) {
   const [message, setMessage] = useState("");
   const [messageListings, setMessageListings] = useState<ChatMessage[]>([]);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -87,6 +88,7 @@ export function ChatArea({ activeChatId, activeChat, onBack }: ChatAreaProps) {
       content: trimmedContent,
     });
     if(response?.data) {
+      handleLastMessage(response?.data as ChatMessage);
       setMessageListings((prevMessages) => [...prevMessages, response?.data as ChatMessage]);
       socket.emit("message", response?.data);
     }
