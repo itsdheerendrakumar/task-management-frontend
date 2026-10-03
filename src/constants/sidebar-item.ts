@@ -13,21 +13,6 @@ export const userRoutes = [
     allowedRoles: "all",
   },
   {
-    label: "Messages",
-    route: "/messages",
-    allowedRoles: "all",
-  },
-  {
-    label: "Notifications",
-    route: "/notifications",
-    allowedRoles: "all",
-  },
-  {
-    label: "Settings",
-    route: "/settings",
-    allowedRoles: "all",
-  },
-  {
     label: "Tasks",
     route: "/tasks",
     allowedRoles: [
@@ -46,6 +31,16 @@ export const userRoutes = [
     ],
   },
   {
+    label: "Messages",
+    route: "/messages",
+    allowedRoles: "all",
+  },
+  {
+    label: "Notifications",
+    route: "/notifications",
+    allowedRoles: "all",
+  },
+  {
     label: "Users",
     route: "/users",
     allowedRoles: [
@@ -59,5 +54,10 @@ export const userRoutes = [
       role.admin,
       role.projectManager,
     ],
+  },
+  {
+    label: "Settings",
+    route: "/settings",
+    allowedRoles: "all",
   },
 ] as const;
