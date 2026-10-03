@@ -5,4 +5,5 @@ export const queryKeys = {
     activity: "activity",
     messageListing: "messageListing",
     messages: "messages",
-}
+    messageContacts: "messageContacts",
+}

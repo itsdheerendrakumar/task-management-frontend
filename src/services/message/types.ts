@@ -1,4 +1,5 @@
 import type { ApiResponse } from "@/utils/response";
+import type { ProfileData } from "../user/types";
 
 export interface ChatListing {
   _id: string;
@@ -48,5 +49,23 @@ export interface CreateMessagePayload {
   content: string;
 }
 
+export interface CreateChatPayload {
+  type: "private" | "group";
+  name?: string;
+  chatParticipants?: string[];
+}
+
+interface CreateChatData {
+    _id: any;
+    type: "private" | "group";
+    name?: string;
+    created_by?: any;
+    image_url?: string;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
 export type CreateMessageResponse = ApiResponse<ChatMessage>;
+export type GetContactsResponse = ApiResponse<ProfileData[]>;
+export type CreateChatResponse = ApiResponse<CreateChatData>;
 

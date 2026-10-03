@@ -12,15 +12,20 @@ import { socket } from "@/socket";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryKeys } from "@/constants/query-keys";
 import { toast } from "sonner";
+import type { ProfileData } from "@/services/user/types";
+import { useCreateChat } from "@/hooks/useCreateChat";
+import { getPrivateChatName } from "@/utils/getPrivateChatName";
 
 interface ChatAreaProps {
   activeChatId: string | null;
   activeChat?: ChatListing | null;
+  newChatUser?: ProfileData | null;
   onBack?: () => void;
+  setActiveChatId: (chatId: string | null) => void;
   handleLastMessage: (message: ChatMessage) => void;
 }
 
-export function ChatArea({ activeChatId, activeChat, onBack, handleLastMessage }: ChatAreaProps) {
+export function ChatArea({ activeChatId, activeChat, newChatUser, onBack, setActiveChatId, handleLastMessage }: ChatAreaProps) {
   const [message, setMessage] = useState("");
   const [messageListings, setMessageListings] = useState<ChatMessage[]>([]);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
@@ -49,6 +54,8 @@ export function ChatArea({ activeChatId, activeChat, onBack, handleLastMessage }
     },
   });
 
+  const { createChatMutation } = useCreateChat();
+
   useEffect(() => {
     const container = messagesContainerRef.current;
     if (!container) return;
@@ -65,6 +72,10 @@ export function ChatArea({ activeChatId, activeChat, onBack, handleLastMessage }
   }, [messageListings, activeChatId]);
 
   useEffect(() => {
+
+    if(!activeChatId) {
+      setMessageListings([]);
+    }
     const handleIncomingMessage = (data: ChatMessage) => {
       if (data.chat_id === activeChatId)
         setMessageListings((prevMessages) => [...prevMessages, data]);
@@ -78,13 +89,19 @@ export function ChatArea({ activeChatId, activeChat, onBack, handleLastMessage }
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim() || !activeChatId || createMessageMutation.isPending) return;
+    if (!message.trim() || createMessageMutation.isPending) return;
 
     const trimmedContent = message.trim();
     setMessage("");
     try {
+      const newChat = !activeChatId ? await createChatMutation.mutateAsync({
+        type: "private", chatParticipants: newChatUser && newChatUser.id !== currentUserId ? [newChatUser.id] : []
+      }) : undefined;
+      if(newChat) {
+        setActiveChatId(newChat?.data?._id || null);
+      }
       const response = await createMessageMutation.mutateAsync({
-      chat_id: activeChatId,
+      chat_id: newChat?.data?._id || activeChatId,
       content: trimmedContent,
     });
     if(response?.data) {
@@ -108,7 +125,7 @@ export function ChatArea({ activeChatId, activeChat, onBack, handleLastMessage }
     });
   };
 
-  if (!activeChatId) {
+  if (!activeChatId && !newChatUser) {
     return (
       <div className="hidden h-full flex-1 items-center justify-center rounded-lg border bg-card shadow-soft sm:flex">
         <div className="flex flex-col items-center gap-4 text-center">
@@ -139,7 +156,8 @@ export function ChatArea({ activeChatId, activeChat, onBack, handleLastMessage }
     );
   }
 
-  const chatName = activeChat?.name || `Chat ${activeChatId.slice(-4)}`;
+  const chatName = activeChatId && (activeChat?.type === "group" ? activeChat?.name : getPrivateChatName(activeChat, currentUserId)) || 
+  (newChatUser?.id === currentUserId ? "You": newChatUser?.name) || "Unknown Chat";
   const initials = chatName ? chatName.substring(0, 2).toUpperCase() : "SC";
   const isGroup = activeChat?.type === "group";
 

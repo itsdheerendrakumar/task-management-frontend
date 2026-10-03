@@ -1,4 +1,4 @@
-import { Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -7,12 +7,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 
 import type { ChatListing } from "@/services/message/types";
+import { Button } from "@/components/ui/button";
+import { useGetProfile } from "@/hooks/useGetProfile";
+import { getPrivateChatName } from "@/utils/getPrivateChatName";
 
 interface ChatSidebarProps {
   chats?: ChatListing[];
   isLoading: boolean;
   activeChatId: string | null;
   onSelectChat: (id: string) => void;
+  onNewChat: () => void;
 }
 
 export function ChatSidebar({
@@ -20,11 +24,21 @@ export function ChatSidebar({
   isLoading,
   activeChatId,
   onSelectChat,
+  onNewChat,
 }: ChatSidebarProps) {
+
+  const { profileQuery } = useGetProfile();
+  const currentUserId = profileQuery?.data?.data?.id;
+
   return (
     <div className="flex h-full w-full flex-col overflow-hidden rounded-lg border bg-card shadow-soft">
       <div className="flex flex-col gap-4 border-b p-4 shrink-0">
-        <h2 className="text-xl font-semibold text-foreground">Messages</h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-xl font-semibold text-foreground">Messages</h2>
+          <Button onClick={onNewChat}>
+            <Plus />
+          </Button>
+        </div>
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -51,7 +65,7 @@ export function ChatSidebar({
             <div className="flex flex-col gap-1">
               {chats.map((chatItem) => {
                 const isActive = activeChatId === chatItem._id;
-                const chatName = chatItem.name || "Unknown Chat";
+                const chatName = chatItem.type === "group" ? chatItem.name ?? "" : getPrivateChatName(chatItem, currentUserId);
                 const initials = chatName.substring(0, 2).toUpperCase();
                 const lastMessage = chatItem.lastMessage?.content?.trim() || "No messages yet";
                 const lastMessageDate = chatItem.lastMessage?.createdAt

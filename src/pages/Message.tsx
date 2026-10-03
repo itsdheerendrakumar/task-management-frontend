@@ -1,19 +1,28 @@
 import { useEffect, useState } from "react";
 import { queryKeys } from "@/constants/query-keys";
 import { useGetProfile } from "@/hooks/useGetProfile";
-import { getChatListing } from "@/services/message";
+import { getChatListing, getContacts } from "@/services/message";
 import { useQuery } from "@tanstack/react-query";
 import { ChatSidebar } from "@/features/message/components/ChatSidebar";
 import { ChatArea } from "@/features/message/components/ChatArea";
 import { socket } from "@/socket";
 import type { ChatListing, ChatMessage } from "@/services/message/types";
+import NewChat from "@/features/message/components/NewChat";
+import type { ProfileData } from "@/services/user/types";
 
 export default function Message() {
   const { profileQuery } = useGetProfile();
   const [chats, setChats] = useState<ChatListing[]>([]);
+  const [isNewChat, setIsNewChat] = useState<boolean>(false);
+  const [newChatUser, setNewChatUser] = useState<ProfileData | null>(null);
   const messageListingQuery = useQuery({
     queryKey: [queryKeys.messageListing, profileQuery?.data?.data?.id],
     queryFn: getChatListing,
+  });
+
+  const contactquery = useQuery({
+    queryKey: [queryKeys.messageContacts, profileQuery?.data?.data?.id],
+    queryFn: getContacts,
   });
 
   useEffect(() => {
@@ -77,23 +86,56 @@ export default function Message() {
     };
   }, [activeChatId])
 
+  const handleNewChatContactSelection = (userId: string) => {
+    const isCurrentUser = profileQuery?.data?.data?.id === userId;
+
+    const existingChat = chats.find(chat => chat.type === "private" && (isCurrentUser ? chat.participants.length === 1 : true) && chat.participants.some(participant => participant.id === userId));
+    if(existingChat) {
+      setActiveChatId(existingChat._id);
+      setIsNewChat(false);
+      return;
+    }
+    
+    const selectedContact = contactquery.data?.data?.find((contact) => contact.id === userId) || null;
+    setNewChatUser(selectedContact);
+    setIsNewChat(false);
+    setActiveChatId(null);
+  }
+
   const activeChat = messageListingQuery.data?.data?.find(c => (c?._id) === activeChatId) || null;
 
   return (
-    <div className="flex h-[calc(100dvh-112px)] max-h-[calc(100dvh-112px)] w-full gap-4 overflow-hidden">
-      <div className={`${activeChatId ? 'hidden sm:flex' : 'flex'} flex-col h-full w-full sm:w-80 md:w-96 shrink-0 min-h-0 overflow-hidden`}>
-        <ChatSidebar
-          chats={chats}
-          isLoading={messageListingQuery.isLoading}
-          activeChatId={activeChatId}
-          onSelectChat={setActiveChatId}
-        />
-      </div>
-      <div className={`${!activeChatId ? 'hidden sm:flex' : 'flex'} flex-col flex-1 min-w-0 min-h-0 h-full overflow-hidden`}>
+    <div className="flex h-[calc(100dvh-112px)] max-h-[calc(100dvh-112px)] w-full gap-4 overflow-hidden"> 
+      {isNewChat &&
+        <div className="flex h-full w-full shrink-0 flex-col overflow-hidden sm:w-80 md:w-96">
+          <NewChat
+            contacts={contactquery.data?.data as ProfileData[] | undefined}
+            isLoading={contactquery.isLoading}
+            onBack={() => setIsNewChat(false)}
+            handleNewChatContactSelection={handleNewChatContactSelection}
+          />
+        </div>
+      }
+
+      {!isNewChat &&
+        <div className={`${activeChatId ? 'hidden sm:flex' : 'flex'} flex-col h-full w-full sm:w-80 md:w-96 shrink-0 min-h-0 overflow-hidden`}>
+          <ChatSidebar
+            chats={chats}
+            isLoading={messageListingQuery.isLoading}
+            activeChatId={activeChatId}
+            onSelectChat={(id: string) => {setActiveChatId(id); setNewChatUser(null);}}
+            onNewChat={() => setIsNewChat(true)}
+          />
+        </div>
+
+      }
+      <div className={`${isNewChat || !activeChatId ? 'hidden sm:flex' : 'flex'} flex-col flex-1 min-w-0 min-h-0 h-full overflow-hidden`}>
         <ChatArea
           activeChatId={activeChatId}
           activeChat={activeChat}
           onBack={() => setActiveChatId(null)}
+          setActiveChatId={setActiveChatId}
+          newChatUser={newChatUser}
           handleLastMessage={(message: ChatMessage) => {
             setChats((prevChats) => prevChats.map((chat) => {
               if (chat._id === message.chat_id) {

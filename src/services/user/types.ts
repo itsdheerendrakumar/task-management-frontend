@@ -1,6 +1,6 @@
 ﻿import type { ApiResponse } from "@/utils/response"
 
-interface ProfileData {
+export interface ProfileData {
     id: string
     name: string
     email: string
