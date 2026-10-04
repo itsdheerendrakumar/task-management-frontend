@@ -10,6 +10,7 @@ import type { ChatListing } from "@/services/message/types";
 import { Button } from "@/components/ui/button";
 import { useGetProfile } from "@/hooks/useGetProfile";
 import { getPrivateChatName } from "@/utils/getPrivateChatName";
+import { format } from "date-fns";
 
 interface ChatSidebarProps {
   chats?: ChatListing[];
@@ -68,9 +69,7 @@ export function ChatSidebar({
                 const chatName = chatItem.type === "group" ? chatItem.name ?? "" : getPrivateChatName(chatItem, currentUserId);
                 const initials = chatName.substring(0, 2).toUpperCase();
                 const lastMessage = chatItem.lastMessage?.content?.trim() || "No messages yet";
-                const lastMessageDate = chatItem.lastMessage?.createdAt
-                  ? new Date(chatItem.lastMessage.createdAt).toLocaleDateString()
-                  : new Date(chatItem.createdAt).toLocaleDateString();
+                const lastMessageDate = chatItem.lastMessage?.createdAt ? format(chatItem.lastMessage.createdAt, "MMM dd hh:mm a") : "";
 
                 return (
                   <button

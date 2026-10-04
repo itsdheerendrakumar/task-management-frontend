@@ -120,7 +120,11 @@ export default function Message() {
       {!isNewChat &&
         <div className={`${activeChatId ? 'hidden sm:flex' : 'flex'} flex-col h-full w-full sm:w-80 md:w-96 shrink-0 min-h-0 overflow-hidden`}>
           <ChatSidebar
-            chats={chats}
+            chats={chats.toSorted((a, b) => {
+              const aTime = a.lastMessage ? Date.parse(a.lastMessage.createdAt) : 0;
+              const bTime = b.lastMessage ? Date.parse(b.lastMessage.createdAt) : 0;
+              return bTime - aTime;
+            })}
             isLoading={messageListingQuery.isLoading}
             activeChatId={activeChatId}
             onSelectChat={(id: string) => {setActiveChatId(id); setNewChatUser(null);}}
