@@ -6,4 +6,5 @@ export const queryKeys = {
     messageListing: "messageListing",
     messages: "messages",
     messageContacts: "messageContacts",
+    unreadMessageCount: "unreadMessageCount",
 }

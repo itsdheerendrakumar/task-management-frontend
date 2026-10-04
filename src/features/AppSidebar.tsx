@@ -20,8 +20,11 @@ import {
     LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { logout } from "@/services/auth";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getTotalUnreadCount } from "@/services/message";
+import { queryKeys } from "@/constants/query-keys";
 
 const routeIcons: Record<string, ComponentType<{ className?: string }>> = {
     "/dashboard": Home,
@@ -37,6 +40,11 @@ const routeIcons: Record<string, ComponentType<{ className?: string }>> = {
 export function AppSidebar() {
     const { profileQuery } = useGetProfile();
     const router = useRouter();
+    const unreadMessageQuery = useQuery({
+        queryKey: [queryKeys.unreadMessageCount, profileQuery?.data?.data?.id],
+        queryFn: getTotalUnreadCount,
+        refetchInterval: 5000
+    });
 
     const logoutMutation = useMutation({
         mutationFn: logout,
@@ -83,7 +91,13 @@ export function AppSidebar() {
                                 }}
                             >
                                 <Icon className="h-4 w-4" />
-                                {routes.label}
+                                <span>{routes.label}</span>
+                                {routes.route === "/messages" &&
+                                    (unreadMessageQuery.data?.data?.unread_count ?? 0) > 0 && (
+                                        <Badge className="ml-auto min-w-5 rounded-full border-none bg-foreground px-1.5 text-background hover:bg-foreground/90">
+                                            {unreadMessageQuery.data?.data?.unread_count}
+                                        </Badge>
+                                    )}
                             </Link>
                         )
                     }

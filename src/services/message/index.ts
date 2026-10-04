@@ -7,6 +7,7 @@ import type {
   CreateMessageResponse,
   GetContactsResponse,
   GetMessagesResponse,
+  TotalUnreadCountResponse,
   UpdateGroupPayload,
 } from "./types";
 
@@ -45,3 +46,7 @@ export async function markAsRead(chatId: string) {
   return response.data;
 }
 
+export async function getTotalUnreadCount(): Promise<TotalUnreadCountResponse> {
+  const response = await api.get("/message/unread-count");
+  return response.data;
+}

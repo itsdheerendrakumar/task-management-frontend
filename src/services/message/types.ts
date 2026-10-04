@@ -66,7 +66,12 @@ interface CreateChatData {
     updatedAt: Date;
 }
 
+interface TotalUnreadCountData {
+  unread_count: number;
+}
+
 export type CreateMessageResponse = ApiResponse<ChatMessage>;
 export type GetContactsResponse = ApiResponse<ProfileData[]>;
 export type CreateChatResponse = ApiResponse<CreateChatData>;
+export type TotalUnreadCountResponse = ApiResponse<TotalUnreadCountData>;
 
