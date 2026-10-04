@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { queryKeys } from "@/constants/query-keys";
 import { useGetProfile } from "@/hooks/useGetProfile";
-import { getChatListing, getContacts } from "@/services/message";
-import { useQuery } from "@tanstack/react-query";
+import { getChatListing, getContacts, markAsRead } from "@/services/message";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ChatSidebar } from "@/features/message/components/ChatSidebar";
 import { ChatArea } from "@/features/message/components/ChatArea";
 import { socket } from "@/socket";
@@ -12,12 +12,20 @@ import type { ProfileData } from "@/services/user/types";
 
 export default function Message() {
   const { profileQuery } = useGetProfile();
+  const queryClient = useQueryClient();
+  const profileId = profileQuery?.data?.data?.id;
+  const messageListingQueryKey = [queryKeys.messageListing, profileId];
   const [chats, setChats] = useState<ChatListing[]>([]);
   const [isNewChat, setIsNewChat] = useState<boolean>(false);
   const [newChatUser, setNewChatUser] = useState<ProfileData | null>(null);
   const messageListingQuery = useQuery({
-    queryKey: [queryKeys.messageListing, profileQuery?.data?.data?.id],
+    queryKey: messageListingQueryKey,
     queryFn: getChatListing,
+  });
+
+  const markAsReadMutation = useMutation({
+    mutationFn: markAsRead,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: messageListingQueryKey }),
   });
 
   const contactquery = useQuery({
@@ -72,9 +80,20 @@ export default function Message() {
 
   useEffect(() => {
     const handleIncomingMessage = (data: ChatMessage) => {
+      if(activeChatId === data.chat_id) {
+        markAsReadMutation.mutate(data.chat_id);
+      } else {
+        queryClient.invalidateQueries({ queryKey: messageListingQueryKey });
+      }
       setChats((prevChats) => prevChats.map((chat) => {
         if (chat._id === data.chat_id) {
-          return { ...chat, lastMessage: data };
+          return {
+            ...chat,
+            lastMessage: data,
+            unread_count: activeChatId === data.chat_id
+              ? 0
+              : (chat.unread_count ?? 0) + 1,
+          };
         }
         return chat;
       }));
@@ -84,7 +103,7 @@ export default function Message() {
     return () => {
       socket.off("message", handleIncomingMessage);
     };
-  }, [activeChatId])
+  }, [activeChatId, markAsReadMutation.mutate, profileId, queryClient])
 
   const handleNewChatContactSelection = (userId: string) => {
     const isCurrentUser = profileQuery?.data?.data?.id === userId;
@@ -127,7 +146,13 @@ export default function Message() {
             })}
             isLoading={messageListingQuery.isLoading}
             activeChatId={activeChatId}
-            onSelectChat={(id: string) => {setActiveChatId(id); setNewChatUser(null);}}
+            onSelectChat={(id: string) => {
+              if (chats.find((chat) => chat._id === id)?.unread_count) {
+                markAsReadMutation.mutate(id);
+              }
+              setActiveChatId(id);
+              setNewChatUser(null);
+            }}
             onNewChat={() => setIsNewChat(true)}
           />
         </div>

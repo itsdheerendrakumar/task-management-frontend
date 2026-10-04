@@ -8,6 +8,7 @@ export interface ChatListing {
   created_by?: string;
   participants: { name: string; id: string }[];
   lastMessage: ChatMessage | null;
+  unread_count: number;
   __v?: number;
   createdAt: string;
   updatedAt: string;

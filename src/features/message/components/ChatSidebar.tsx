@@ -91,21 +91,31 @@ export function ChatSidebar({
                         <span className="truncate font-medium text-foreground">
                           {chatName}
                         </span>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="shrink-0 text-xs text-muted-foreground">
                           {lastMessageDate}
                         </span>
                       </div>
 
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <span className="block max-w-full overflow-hidden text-ellipsis whitespace-nowrap text-sm text-muted-foreground">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="min-w-0 flex-1 overflow-hidden text-ellipsis whitespace-nowrap text-sm text-muted-foreground">
+                              {lastMessage}
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent side="top" className="max-w-xs break-words whitespace-pre-wrap">
                             {lastMessage}
+                          </TooltipContent>
+                        </Tooltip>
+                        {chatItem.unread_count > 0 && (
+                          <span
+                            aria-label={`${chatItem.unread_count} unread messages`}
+                            className="inline-flex min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 py-0.5 text-xs font-semibold text-primary-foreground"
+                          >
+                            {chatItem.unread_count > 99 ? "99+" : chatItem.unread_count}
                           </span>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" className="max-w-xs break-words whitespace-pre-wrap">
-                          {lastMessage}
-                        </TooltipContent>
-                      </Tooltip>
+                        )}
+                      </div>
                     </div>
                   </button>
                 );

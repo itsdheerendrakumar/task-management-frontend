@@ -40,3 +40,8 @@ export async function getContacts(): Promise<GetContactsResponse> {
   return response.data;
 }
 
+export async function markAsRead(chatId: string) {
+  const response = await api.patch(`/message/${chatId}/read`);
+  return response.data;
+}
+
