@@ -77,6 +77,7 @@ export default function Message() {
   }, [messageListingQuery.data?.data]);
 
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
+  const hasSelectedConversation = Boolean(activeChatId || newChatUser);
 
   useEffect(() => {
     const handleIncomingMessage = (data: ChatMessage) => {
@@ -137,7 +138,7 @@ export default function Message() {
       }
 
       {!isNewChat &&
-        <div className={`${activeChatId ? 'hidden sm:flex' : 'flex'} flex-col h-full w-full sm:w-80 md:w-96 shrink-0 min-h-0 overflow-hidden`}>
+        <div className={`${hasSelectedConversation ? 'hidden sm:flex' : 'flex'} flex-col h-full w-full sm:w-80 md:w-96 shrink-0 min-h-0 overflow-hidden`}>
           <ChatSidebar
             chats={chats.toSorted((a, b) => {
               const aTime = a.lastMessage ? Date.parse(a.lastMessage.createdAt) : 0;
@@ -158,11 +159,14 @@ export default function Message() {
         </div>
 
       }
-      <div className={`${isNewChat || !activeChatId ? 'hidden sm:flex' : 'flex'} flex-col flex-1 min-w-0 min-h-0 h-full overflow-hidden`}>
+      <div className={`${isNewChat || !hasSelectedConversation ? 'hidden sm:flex' : 'flex'} flex-col flex-1 min-w-0 min-h-0 h-full overflow-hidden`}>
         <ChatArea
           activeChatId={activeChatId}
           activeChat={activeChat}
-          onBack={() => setActiveChatId(null)}
+          onBack={() => {
+            setActiveChatId(null);
+            setNewChatUser(null);
+          }}
           setActiveChatId={setActiveChatId}
           newChatUser={newChatUser}
           handleLastMessage={(message: ChatMessage) => {
