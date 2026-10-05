@@ -188,12 +188,12 @@ export function ChatArea({ activeChatId, activeChat, newChatUser, onBack, setAct
             <span className="text-xs text-success">
               {isGroup
                 ? `${activeChat?.participants?.length || 0} participants`
-                : 'Online'}
+                : ''}
             </span>
           </div>
         </div>
 
-        {isGroup && (
+        {isGroup && profileQuery?.data?.data?.role === "admin" && (
           <Button
             variant="ghost"
             size="icon"
