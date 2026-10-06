@@ -3,7 +3,6 @@ import type {
   ChatListingResponse,
   CreateChatPayload,
   CreateChatResponse,
-  CreateMessagePayload,
   CreateMessageResponse,
   GetContactsResponse,
   GetMessagesResponse,
