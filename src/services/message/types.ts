@@ -32,7 +32,8 @@ export interface ChatMessage {
   chat_id: string;
   sender_id: MessageSender | string;
   content: string;
-  type: "text" | string;
+  attachment_public_id?: string;
+  attachment_format?: string;
   createdAt: string;
   updatedAt: string;
   __v?: number;

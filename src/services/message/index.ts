@@ -21,8 +21,12 @@ export async function getMessagesByChatId(chatId: string): Promise<GetMessagesRe
   return response.data;
 }
 
-export async function createMessage(payload: CreateMessagePayload): Promise<CreateMessageResponse> {
-  const response = await api.post("/message", payload);
+export async function createMessage(payload: FormData): Promise<CreateMessageResponse> {
+  const response = await api.post("/message", payload, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 }
 
@@ -48,5 +52,12 @@ export async function markAsRead(chatId: string) {
 
 export async function getTotalUnreadCount(): Promise<TotalUnreadCountResponse> {
   const response = await api.get("/message/unread-count");
+  return response.data;
+}
+
+export async function getMessageFile(messageId: string): Promise<Blob> {
+  const response = await api.get(`/message/${messageId}/file`, {
+    responseType: "blob",
+  });
   return response.data;
 }

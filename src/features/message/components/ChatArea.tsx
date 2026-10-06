@@ -1,4 +1,4 @@
-import { Paperclip, Send, MoreHorizontal, MessageSquare, AlertCircle, RefreshCw, Loader2, ArrowLeft } from "lucide-react";
+import { Paperclip, Send, MoreHorizontal, MessageSquare, AlertCircle, RefreshCw, Loader2, ArrowLeft, X } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import type { ProfileData } from "@/services/user/types";
 import { useCreateChat } from "@/hooks/useCreateChat";
 import { getPrivateChatName } from "@/utils/getPrivateChatName";
+import { MessageAttachment } from "./MessageAttachment";
 
 interface ChatAreaProps {
   activeChatId: string | null;
@@ -28,6 +29,8 @@ interface ChatAreaProps {
 export function ChatArea({ activeChatId, activeChat, newChatUser, onBack, setActiveChatId, handleLastMessage }: ChatAreaProps) {
   const [message, setMessage] = useState("");
   const [messageListings, setMessageListings] = useState<ChatMessage[]>([]);
+  const messageAttachmentRef = useRef<HTMLInputElement | null>(null);
+  const [attachment, setAttachment] = useState<File | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement | null>(null);
   const prevChatIdRef = useRef<string | null>(null);
@@ -89,7 +92,7 @@ export function ChatArea({ activeChatId, activeChat, newChatUser, onBack, setAct
 
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!message.trim() || createMessageMutation.isPending) return;
+    if ((!message.trim() && !attachment) || createMessageMutation.isPending) return;
 
     const trimmedContent = message.trim();
     setMessage("");
@@ -100,12 +103,16 @@ export function ChatArea({ activeChatId, activeChat, newChatUser, onBack, setAct
       if(newChat) {
         setActiveChatId(newChat?.data?._id || null);
       }
-      const response = await createMessageMutation.mutateAsync({
-      chat_id: newChat?.data?._id || activeChatId,
-      content: trimmedContent,
-    });
+      const formData = new FormData();
+      formData.append("chat_id", newChat?.data?._id || activeChatId!);
+      formData.append("content", trimmedContent);
+      if(attachment) {
+        formData.append("attachment", attachment);
+      }
+      const response = await createMessageMutation.mutateAsync(formData);
     if(response?.data) {
       handleLastMessage(response?.data as ChatMessage);
+      setAttachment(null);
       setMessageListings((prevMessages) => [...prevMessages, response?.data as ChatMessage]);
       socket.emit("message", response?.data);
     }
@@ -296,7 +303,14 @@ export function ChatArea({ activeChatId, activeChat, newChatUser, onBack, setAct
                       {senderName}
                     </span>
                   )}
-                  <p className="whitespace-pre-wrap break-words">{msg.content}</p>
+                  {msg.content && <p className="whitespace-pre-wrap break-words">{msg.content}</p>}
+                  {msg.attachment_public_id && (
+                    <MessageAttachment 
+                      messageId={msg._id} 
+                      format={msg.attachment_format} 
+                      isMe={isMe} 
+                    />
+                  )}
                   <span
                     className={cn(
                       "mt-1 block text-[10px] opacity-70",
@@ -313,16 +327,42 @@ export function ChatArea({ activeChatId, activeChat, newChatUser, onBack, setAct
       </div>
 
       {/* Input Area */}
-      <div className="border-t bg-card p-4 shrink-0">
+      <div className="border-t bg-card p-4 shrink-0 relative">
+        {attachment && (
+          <div className="absolute bottom-full left-4 mb-2 flex items-center gap-1.5 bg-muted/80 text-muted-foreground px-3 py-1.5 rounded-full text-sm border shadow-sm">
+            <button
+              type="button"
+              className="hover:text-destructive transition-colors"
+              onClick={() => setAttachment(null)}
+              aria-label="Remove attachment"
+            >
+              <X className="size-4" />
+            </button>
+            <span className="truncate max-w-[200px]">{attachment.name}</span>
+          </div>
+        )}
         <form onSubmit={handleSendMessage} className="flex items-center gap-2">
           <Button
             type="button"
             variant="ghost"
             size="icon"
             className="shrink-0 text-muted-foreground hover:text-primary"
+            onClick={() => messageAttachmentRef.current?.click()}
           >
             <Paperclip className="size-5" />
           </Button>
+          <Input
+            ref={messageAttachmentRef}
+            type="file"
+            className="hidden"
+            accept="image/*, video/*, audio/*, .pdf"
+            onChange={(e) => {
+              if (e.target.files && e.target.files.length > 0) {
+                setAttachment(e.target.files[0]);
+                console.log("Selected file:", e.target.files);
+              }
+            }}
+          />
           <Input
             value={message}
             onChange={(e) => setMessage(e.target.value)}
@@ -332,7 +372,7 @@ export function ChatArea({ activeChatId, activeChat, newChatUser, onBack, setAct
           <Button
             type="submit"
             size="icon"
-            disabled={!message.trim() || createMessageMutation.isPending}
+            disabled={(!message.trim() && !attachment) || createMessageMutation.isPending}
             className="shrink-0 rounded-full h-11 w-11 shadow-md transition-transform active:scale-95"
           >
             {createMessageMutation.isPending ? (
