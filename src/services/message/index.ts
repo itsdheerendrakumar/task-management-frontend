@@ -54,9 +54,7 @@ export async function getTotalUnreadCount(): Promise<TotalUnreadCountResponse> {
   return response.data;
 }
 
-export async function getMessageFile(messageId: string): Promise<Blob> {
-  const response = await api.get(`/message/${messageId}/file`, {
-    responseType: "blob",
-  });
-  return response.data;
+export async function getMessageFile(messageId: string): Promise<string> {
+  const response = await api.get(`/message/${messageId}/file`);
+  return response.data.data.url;
 }

@@ -15,15 +15,13 @@ export function MessageAttachment({ messageId, format, isMe }: MessageAttachment
   const [error, setError] = useState(false);
 
   useEffect(() => {
-    let url: string | null = null;
     let mounted = true;
 
     async function loadFile() {
       try {
-        const blob = await getMessageFile(messageId);
+        const fetchedUrl = await getMessageFile(messageId);
         if (mounted) {
-          url = URL.createObjectURL(blob);
-          setBlobUrl(url);
+          setBlobUrl(fetchedUrl);
           setIsLoading(false);
         }
       } catch (err) {
@@ -39,9 +37,6 @@ export function MessageAttachment({ messageId, format, isMe }: MessageAttachment
 
     return () => {
       mounted = false;
-      if (url) {
-        URL.revokeObjectURL(url);
-      }
     };
   }, [messageId]);
 
