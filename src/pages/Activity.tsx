@@ -24,7 +24,51 @@ import {
 } from "@/components/ui/select"
 import { useState } from 'react';
 import { useParticipantQuery } from '@/hooks/useParticipantQuery';
-import { Button } from '@/components/ui/button';
+import {
+    Pagination,
+    PaginationContent,
+    PaginationEllipsis,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from '@/components/ui/pagination';
+
+function getPaginationItems(currentPage: number, totalPages: number) {
+    const pages = new Set<number>();
+
+    for (let pageNumber = 1; pageNumber <= Math.min(3, totalPages); pageNumber++) {
+        pages.add(pageNumber);
+    }
+
+    for (
+        let pageNumber = Math.max(1, currentPage - 1);
+        pageNumber <= Math.min(totalPages, currentPage + 1);
+        pageNumber++
+    ) {
+        pages.add(pageNumber);
+    }
+
+    for (
+        let pageNumber = Math.max(1, totalPages - 2);
+        pageNumber <= totalPages;
+        pageNumber++
+    ) {
+        pages.add(pageNumber);
+    }
+
+    const sortedPages = Array.from(pages).sort((a, b) => a - b);
+    const items: (number | 'ellipsis')[] = [];
+
+    sortedPages.forEach((pageNumber, index) => {
+        if (index > 0 && pageNumber - sortedPages[index - 1] > 1) {
+            items.push('ellipsis');
+        }
+        items.push(pageNumber);
+    });
+
+    return items;
+}
 
 export function Activity() {
     const {participantsQuery} = useParticipantQuery(["admin"]);
@@ -40,6 +84,7 @@ export function Activity() {
 
     const pagination = activityQuery.data?.data?.pagination;
     const totalPages = pagination?.totalPages ?? 1;
+    const paginationItems = getPaginationItems(page, totalPages);
 
     return (
         <Card>
@@ -154,25 +199,64 @@ export function Activity() {
                     </Select>
 
                     <div className="flex items-center gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setPage((p) => Math.max(1, p - 1))}
-                            disabled={page <= 1 || activityQuery.isFetching}
-                        >
-                            Previous
-                        </Button>
                         <span className="text-sm text-muted-foreground">
                             Page {page} of {totalPages}
                         </span>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setPage((p) => p + 1)}
-                            disabled={page >= totalPages || activityQuery.isFetching}
-                        >
-                            Next
-                        </Button>
+                        <Pagination className="mx-0 w-auto justify-end">
+                            <PaginationContent>
+                                <PaginationItem>
+                                    <PaginationPrevious
+                                        href="#"
+                                        aria-disabled={page <= 1 || activityQuery.isFetching}
+                                        tabIndex={page <= 1 || activityQuery.isFetching ? -1 : undefined}
+                                        className={page <= 1 || activityQuery.isFetching ? "pointer-events-none opacity-50" : ""}
+                                        onClick={(event) => {
+                                            event.preventDefault();
+                                            if (!activityQuery.isFetching && page > 1) {
+                                                setPage((currentPage) => currentPage - 1);
+                                            }
+                                        }}
+                                    />
+                                </PaginationItem>
+                                {paginationItems.map((item, index) => (
+                                    <PaginationItem key={`${item}-${index}`}>
+                                        {item === 'ellipsis' ? (
+                                            <PaginationEllipsis />
+                                        ) : (
+                                            <PaginationLink
+                                                href="#"
+                                                isActive={item === page}
+                                                aria-label={`Go to page ${item}`}
+                                                aria-disabled={activityQuery.isFetching}
+                                                tabIndex={activityQuery.isFetching ? -1 : undefined}
+                                                onClick={(event) => {
+                                                    event.preventDefault();
+                                                    if (!activityQuery.isFetching) {
+                                                        setPage(item);
+                                                    }
+                                                }}
+                                            >
+                                                {item}
+                                            </PaginationLink>
+                                        )}
+                                    </PaginationItem>
+                                ))}
+                                <PaginationItem>
+                                    <PaginationNext
+                                        href="#"
+                                        aria-disabled={page >= totalPages || activityQuery.isFetching}
+                                        tabIndex={page >= totalPages || activityQuery.isFetching ? -1 : undefined}
+                                        className={page >= totalPages || activityQuery.isFetching ? "pointer-events-none opacity-50" : ""}
+                                        onClick={(event) => {
+                                            event.preventDefault();
+                                            if (!activityQuery.isFetching && page < totalPages) {
+                                                setPage((currentPage) => currentPage + 1);
+                                            }
+                                        }}
+                                    />
+                                </PaginationItem>
+                            </PaginationContent>
+                        </Pagination>
                     </div>
                 </div>
                 }
