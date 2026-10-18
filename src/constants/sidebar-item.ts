@@ -35,11 +35,11 @@ export const userRoutes = [
     route: "/messages",
     allowedRoles: "all",
   },
-  {
-    label: "Notifications",
-    route: "/notifications",
-    allowedRoles: "all",
-  },
+  // {
+  //   label: "Notifications",
+  //   route: "/notifications",
+  //   allowedRoles: "all",
+  // },
   {
     label: "Users",
     route: "/users",
