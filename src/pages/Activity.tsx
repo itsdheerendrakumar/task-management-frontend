@@ -1,5 +1,6 @@
-import { useQuery } from '@tanstack/react-query'
-import { getActivity } from "@/services/activity"
+import { useMutation, useQuery } from '@tanstack/react-query'
+import { deleteActivities, getActivity } from "@/services/activity"
+import {toast} from "sonner"
 import { useGetProfile } from '@/hooks/useGetProfile';
 import { queryKeys } from '@/constants/query-keys';
 import {
@@ -22,7 +23,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select"
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useParticipantQuery } from '@/hooks/useParticipantQuery';
 import {
     Pagination,
@@ -33,6 +34,15 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from '@/components/ui/pagination';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Trash } from 'lucide-react';
+
+function handleActivityChecks(checked: boolean) {
+    const elements = document.querySelectorAll<HTMLInputElement>(".activityCheck");
+    for(const elem of elements)
+        elem.checked = checked;
+}
 
 function getPaginationItems(currentPage: number, totalPages: number) {
     const pages = new Set<number>();
@@ -72,15 +82,58 @@ function getPaginationItems(currentPage: number, totalPages: number) {
 
 export function Activity() {
     const {participantsQuery} = useParticipantQuery(["admin"]);
-    const [userId, setUserId] = useState<string>("");
+    const [userId, setUserId] = useState<string>("all");
     const [limit, setLimit] = useState("10");
     const [page, setPage] = useState(1);
     const { } = useGetProfile();
+    const idRef = useRef<string[]>([]);
+    const checkAllRef = useRef<HTMLInputElement>(null);
     const activityQuery = useQuery({
         queryKey: [queryKeys.activity, page, limit, userId],
         queryFn: () => getActivity({ limit, page, userId }),
         refetchOnWindowFocus: false
     });
+
+    const handleAllChecked = () => {
+        if(checkAllRef.current)
+            checkAllRef.current.checked = false;
+        handleActivityChecks(false);
+    }
+
+    const deleteActivitiesMutation = useMutation({
+        mutationFn: () => deleteActivities(idRef.current),
+        onSuccess: () => {
+            idRef.current = [];
+            handleAllChecked();
+            setPage(1);
+            toast.success("Activities deleted successfully");
+        },
+        onError: (error: any) => {
+            toast.error(error?.response?.data?.message || "Failed to delete activities");
+        }
+
+    });
+
+    const handleActivityCheck = (id: string) => {
+        if(idRef.current.includes(id))
+            idRef.current = idRef.current.filter(activityId => activityId !== id);
+        else
+            idRef.current.push(id);
+    }
+
+    const handleCheckAll = (isChecked: boolean) => {
+        if(isChecked) {
+            activityQuery.data?.data?.data?.forEach(activity => {
+                if(!idRef.current.includes(activity.id.toString()))
+                    idRef.current.push(activity.id.toString());
+            });
+            handleActivityChecks(isChecked)
+        }
+        else {
+            idRef.current = [];
+            handleActivityChecks(isChecked)
+        }
+    }
 
     const pagination = activityQuery.data?.data?.pagination;
     const totalPages = pagination?.totalPages ?? 1;
@@ -90,12 +143,16 @@ export function Activity() {
         <Card>
             <CardHeader className="flex items-center justify-between gap-4 flex-wrap">
                 <CardTitle>Activity Log</CardTitle>
-                <Select value={userId} onValueChange={(value) => { setUserId(value); setPage(1); }} disabled={activityQuery.isFetching}>
+                <div className="flex items-center gap-4">
+                    <Select value={userId} onValueChange={(value) => { setUserId(value); setPage(1); handleAllChecked() }} disabled={activityQuery.isFetching}>
                         <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Select User" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectGroup>
+                                <SelectItem value="all">
+                                    All
+                                </SelectItem>
                                 {participantsQuery?.data?.data?.map((user) => (
                                     <SelectItem key={user.id} value={user.id.toString()} className="text-sm text-center">
                                         {user?.name + " (" + user.role + ")"}
@@ -104,6 +161,22 @@ export function Activity() {
                             </SelectGroup>
                         </SelectContent>
                     </Select>
+
+                    <Button
+                        variant="ghost"
+                        className="cursor-pointer"
+                        onClick={() => {
+                            if(idRef.current.length === 0)
+                                return toast.warning("At least select one activity")
+                            deleteActivitiesMutation.mutate()
+                        }}
+                        disabled={deleteActivitiesMutation.isPending}
+                    >
+                        <Trash 
+                            className="text-red-500 hover:text-red-700"
+                        />
+                    </Button>
+                </div>
             </CardHeader>
 
             <CardContent className="p-0 relative">
@@ -113,6 +186,15 @@ export function Activity() {
                 <Table>
                     <TableHeader>
                         <TableRow>
+                            <TableHead>
+                                <Input
+                                    ref={checkAllRef}
+                                    type="checkbox"
+                                    className='w-5 h-5'
+                                    onChange={(e) => handleCheckAll(e.target.checked)}
+                                    disabled={activityQuery.isLoading || deleteActivitiesMutation.isPending}
+                                />
+                            </TableHead>
                             <TableHead className="w-40">Action</TableHead>
                             <TableHead>Message</TableHead>
                             <TableHead className="w-40">Performed By</TableHead>
@@ -123,7 +205,7 @@ export function Activity() {
                     <TableBody>
                         {activityQuery.isLoading && (
                             <TableRow>
-                                <TableCell colSpan={4}>
+                                <TableCell colSpan={5}>
                                     <SectionLoader />
                                 </TableCell>
                             </TableRow>
@@ -132,6 +214,13 @@ export function Activity() {
                         {activityQuery.isSuccess &&
                             activityQuery.data?.data?.data?.map((activity) => (
                                 <TableRow key={activity.id}>
+                                    <TableCell>
+                                        <Input 
+                                            type="checkbox"
+                                            className='w-5 h-5 activityCheck'
+                                            onChange={() => handleActivityCheck(activity?.id?.toString())}
+                                        />
+                                    </TableCell>
                                     <TableCell>
                                         <Badge variant="outline">
                                             {activity.action
@@ -183,7 +272,7 @@ export function Activity() {
                 </Table>
                 {activityQuery.isSuccess && 
                 <div className="flex items-center justify-between mt-4 px-4 pb-4">
-                    <Select value={limit} onValueChange={(value) => { setLimit(value); setPage(1); }}>
+                    <Select value={limit} onValueChange={(value) => { setLimit(value); setPage(1); handleAllChecked()}}>
                         <SelectTrigger className="w-[180px]">
                             <SelectValue placeholder="Rows per page" />
                         </SelectTrigger>
@@ -212,6 +301,7 @@ export function Activity() {
                                         className={page <= 1 || activityQuery.isFetching ? "pointer-events-none opacity-50" : ""}
                                         onClick={(event) => {
                                             event.preventDefault();
+                                            handleAllChecked()
                                             if (!activityQuery.isFetching && page > 1) {
                                                 setPage((currentPage) => currentPage - 1);
                                             }
@@ -231,6 +321,7 @@ export function Activity() {
                                                 tabIndex={activityQuery.isFetching ? -1 : undefined}
                                                 onClick={(event) => {
                                                     event.preventDefault();
+                                                    handleAllChecked()
                                                     if (!activityQuery.isFetching) {
                                                         setPage(item);
                                                     }
@@ -249,6 +340,7 @@ export function Activity() {
                                         className={page >= totalPages || activityQuery.isFetching ? "pointer-events-none opacity-50" : ""}
                                         onClick={(event) => {
                                             event.preventDefault();
+                                            handleAllChecked();
                                             if (!activityQuery.isFetching && page < totalPages) {
                                                 setPage((currentPage) => currentPage + 1);
                                             }
