@@ -133,12 +133,12 @@ export default function CreateTaskModal({ onCreate }: CreateTaskModalProps) {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button size="lg" className="h-12 rounded-xl px-6 shadow-md">
+        <Button size="lg" className="h-10 sm:h-12 rounded-xl px-4 sm:px-6 shadow-md w-full sm:w-auto">
           New task
         </Button>
       </DialogTrigger>
 
-      <DialogContent className="w-[min(90vw,900px)] sm:max-w-[900px] rounded-3xl p-8">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-full sm:max-w-[900px] max-h-[90dvh] overflow-y-auto rounded-2xl sm:rounded-3xl p-5 sm:p-8">
         <DialogHeader>
           <DialogTitle>Create a task</DialogTitle>
           <DialogDescription>

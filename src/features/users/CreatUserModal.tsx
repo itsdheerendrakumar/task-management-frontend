@@ -76,9 +76,9 @@ export function CreateuserModal({
       open={open}
       onOpenChange={onOpenChange}
     >
-      <DialogContent className="sm:max-w-[640px] rounded-3xl p-8">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-full sm:max-w-[640px] max-h-[90dvh] overflow-y-auto rounded-2xl sm:rounded-3xl p-5 sm:p-8">
         <DialogHeader>
-          <DialogTitle className="text-3xl font-semibold">
+          <DialogTitle className="text-2xl sm:text-3xl font-semibold">
             Create new account
           </DialogTitle>
 

@@ -28,20 +28,20 @@ export function User() {
   });
   return (
     <div className="w-full">
-      <div className="mb-6 flex items-start justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
-          <h1 className="text-4xl font-semibold tracking-tight">
+          <h1 className="text-2xl sm:text-4xl font-semibold tracking-tight">
             User management
           </h1>
 
-          <p className="mt-2 text-muted-foreground text-lg">
+          <p className="mt-1 sm:mt-2 text-muted-foreground text-sm sm:text-lg">
             Add teammates, manage roles, and revoke access.
           </p>
         </div>
 
         <Button
           size="lg"
-          className="h-12 rounded-xl px-6 shadow-md"
+          className="h-10 sm:h-12 rounded-xl px-4 sm:px-6 shadow-md w-full sm:w-auto"
           onClick={() => setIsCreateUserModalOpen(true)}
         >
           <Plus className="size-5" />
@@ -53,7 +53,7 @@ export function User() {
       {userListingQuery.isError && <ShowError message="Failed to load users. Please try again." />}
 
       {userListingQuery.isSuccess &&
-        <div className="overflow-hidden rounded-lg border bg-card shadow-soft">
+        <div className="overflow-x-auto rounded-lg border bg-card shadow-soft">
           <Table>
             <TableHeader>
               <TableRow className="bg-muted/20 hover:bg-muted/20">

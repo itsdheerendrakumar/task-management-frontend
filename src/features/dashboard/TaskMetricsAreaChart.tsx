@@ -84,7 +84,7 @@ export function TaskMetricsAreaChart({ data }: TaskMetricsAreaChartProps) {
   ];
 
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+    <div className="rounded-2xl sm:rounded-3xl border border-slate-200 bg-white p-4 sm:p-6 shadow-sm min-w-0 overflow-hidden">
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold text-slate-900">Task Trends</h2>

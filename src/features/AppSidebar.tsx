@@ -3,6 +3,7 @@ import {
     SidebarContent,
     SidebarHeader,
     SidebarFooter,
+    useSidebar,
 } from "@/components/ui/sidebar"
 import { useGetProfile } from "@/hooks/useGetProfile";
 import { userRoutes } from "@/constants/sidebar-item";
@@ -38,6 +39,7 @@ const routeIcons: Record<string, ComponentType<{ className?: string }>> = {
 };
 
 export function AppSidebar() {
+    const { isMobile, setOpenMobile } = useSidebar();
     const { profileQuery } = useGetProfile();
     const router = useRouter();
     const unreadMessageQuery = useQuery({
@@ -59,6 +61,9 @@ export function AppSidebar() {
     });
 
     const handleLogout = async () => {
+        if (isMobile) {
+            setOpenMobile(false);
+        }
         await logoutMutation.mutateAsync();
     };
 
@@ -84,6 +89,11 @@ export function AppSidebar() {
                             <Link
                                 key={routes.route}
                                 to={routes.route}
+                                onClick={() => {
+                                    if (isMobile) {
+                                        setOpenMobile(false);
+                                    }
+                                }}
                                 className="flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition bg-[var(--color-sidebar-accent)] text-[var(--color-sidebar-accent-foreground)] hover:bg-[var(--color-sidebar-primary)] hover:text-[var(--color-sidebar-primary-foreground)]"
                                 style={{
                                     color: "var(--color-sidebar-accent-foreground)",

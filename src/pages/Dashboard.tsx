@@ -75,7 +75,7 @@ export function Dashboard() {
 
     return (
         <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
                 {metricsLoading && (
                     <div className="col-span-full">
                         <SectionLoader />
@@ -95,7 +95,7 @@ export function Dashboard() {
                     metricCards.map((card, index) => (
                         <div
                             key={index}
-                            className={`${card.bgColor} rounded-lg p-6 border border-gray-200`}
+                            className={`${card.bgColor} rounded-lg p-4 sm:p-6 border border-gray-200`}
                         >
                             <div className="flex items-start justify-between">
                                 <div>

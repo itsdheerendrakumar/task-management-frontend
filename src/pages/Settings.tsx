@@ -157,30 +157,30 @@ export default function Settings() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-4xl font-semibold tracking-tight">Settings</h1>
-        <p className="mt-2 text-muted-foreground text-lg">
+        <h1 className="text-2xl sm:text-4xl font-semibold tracking-tight">Settings</h1>
+        <p className="mt-1 sm:mt-2 text-muted-foreground text-sm sm:text-lg">
           Update your account details, change your profile photo, and manage your password separately.
         </p>
       </div>
 
       {profileQuery.isLoading ? (
-        <div className="rounded-3xl border bg-card p-6 shadow-soft">Loading profile...</div>
+        <div className="rounded-2xl sm:rounded-3xl border bg-card p-4 sm:p-6 shadow-soft">Loading profile...</div>
       ) : profileQuery.isError ? (
-        <div className="rounded-3xl border border-destructive/50 bg-destructive/10 p-6 text-destructive">
+        <div className="rounded-2xl sm:rounded-3xl border border-destructive/50 bg-destructive/10 p-4 sm:p-6 text-destructive">
           Failed to load profile. Please refresh the page.
         </div>
       ) : (
         <div className="space-y-6">
-          <section className="rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-sky-50 to-emerald-50 p-6 shadow-soft">
-            <div className="mb-6 flex flex-col gap-3 rounded-3xl border border-indigo-100 bg-white/80 p-5 shadow-sm">
-              <div className="flex items-center justify-between gap-4">
+          <section className="rounded-2xl sm:rounded-3xl border border-indigo-100 bg-gradient-to-br from-indigo-50 via-sky-50 to-emerald-50 p-4 sm:p-6 shadow-soft">
+            <div className="mb-6 flex flex-col gap-3 rounded-2xl sm:rounded-3xl border border-indigo-100 bg-white/80 p-4 sm:p-5 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-semibold tracking-tight text-slate-900">Profile details</h2>
-                  <p className="mt-1 text-muted-foreground">
+                  <h2 className="text-xl sm:text-2xl font-semibold tracking-tight text-slate-900">Profile details</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">
                     Update your profile picture. Name and email are read-only here.
                   </p>
                 </div>
-                <div className="rounded-full bg-gradient-to-r from-sky-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-white shadow-sm">
+                <div className="rounded-full bg-gradient-to-r from-sky-500 to-cyan-500 px-4 py-2 text-sm font-semibold text-white shadow-sm self-start sm:self-auto">
                   Personal settings
                 </div>
               </div>
@@ -261,7 +261,7 @@ export default function Settings() {
             </form>
           </section>
 
-          <section className="rounded-3xl border border-cyan-100 bg-gradient-to-br from-cyan-50 to-slate-100 p-6 shadow-soft">
+          <section className="rounded-2xl sm:rounded-3xl border border-cyan-100 bg-gradient-to-br from-cyan-50 to-slate-100 p-4 sm:p-6 shadow-soft">
             <div className="mb-6 flex flex-col gap-2">
               <h2 className="text-2xl font-semibold text-slate-900">Password</h2>
               <p className="text-muted-foreground">Change your password independently from your profile settings.</p>

@@ -47,8 +47,8 @@ export function LoginPage() {
 
   return (
     <div className="grid min-h-screen bg-background">
-      <div className="flex items-center justify-center p-8">
-        <div className="w-full max-w-2xl rounded-3xl border border-border bg-card p-8 shadow-soft">
+      <div className="flex items-center justify-center p-4 sm:p-8">
+        <div className="w-full max-w-2xl rounded-2xl sm:rounded-3xl border border-border bg-card p-5 sm:p-8 shadow-soft">
           <div className="flex items-center gap-2">
             <div className="grid h-9 w-9 place-items-center rounded-xl bg-gradient-to-br from-primary to-accent-foreground text-primary-foreground">
               <Sparkles className="h-4 w-4" />
@@ -57,10 +57,10 @@ export function LoginPage() {
               <div className="text-sm font-semibold">TaskFlow</div>
             </div>
           </div>
-          <div className="flex items-center gap-5 flex-wrap mb-4">
-              <span>Quick Login As</span>
+          <div className="flex items-center gap-2 sm:gap-3 flex-wrap mb-4">
+              <span className="text-xs sm:text-sm font-medium text-muted-foreground w-full sm:w-auto">Quick Login As</span>
               {testUser.map(({email, password, role}) => (
-                <Button className="cursor-pointer" onClick={() => onSubmit({email, password})} disabled={loginMutation.isPending}>{role}</Button>
+                <Button key={role} className="cursor-pointer text-xs sm:text-sm" onClick={() => onSubmit({email, password})} disabled={loginMutation.isPending}>{role}</Button>
               ))}
           </div>
           <h1 className="text-2xl font-semibold tracking-tight">Welcome back</h1>

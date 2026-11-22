@@ -95,8 +95,8 @@ const [status, setStatus] = useState("both");
     <div className="w-full">
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
-          <h1 className="text-4xl font-semibold tracking-tight">All tasks</h1>
-          <p className="mt-2 text-muted-foreground text-lg">
+          <h1 className="text-2xl sm:text-4xl font-semibold tracking-tight">All tasks</h1>
+          <p className="mt-1 sm:mt-2 text-muted-foreground text-sm sm:text-lg">
             Filter, sort, and act on every task in your workspace.
           </p>
         </div>
@@ -124,7 +124,7 @@ const [status, setStatus] = useState("both");
             </Select>
           </div>
         </div>
-        <div className="overflow-hidden rounded-lg border bg-card shadow-soft">
+        <div className="overflow-x-auto rounded-lg border bg-card shadow-soft">
         <Table>
           <TableHeader>
             <TableRow className="bg-muted/20 hover:bg-muted/20">

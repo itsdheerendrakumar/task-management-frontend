@@ -125,7 +125,7 @@ export default function Message() {
   const activeChat = messageListingQuery.data?.data?.find(c => (c?._id) === activeChatId) || null;
 
   return (
-    <div className="flex h-[calc(100dvh-112px)] max-h-[calc(100dvh-112px)] w-full gap-4 overflow-hidden"> 
+    <div className="flex h-[calc(100dvh-5.5rem)] md:h-[calc(100dvh-112px)] max-h-[calc(100dvh-5.5rem)] md:max-h-[calc(100dvh-112px)] w-full gap-4 overflow-hidden"> 
       {isNewChat &&
         <div className="flex h-full w-full shrink-0 flex-col overflow-hidden sm:w-80 md:w-96">
           <NewChat

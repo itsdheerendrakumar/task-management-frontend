@@ -9,10 +9,10 @@ import {
 export function Header() {
     const { profileQuery } = useGetProfile();
     return (
-        <header className="border-b border-gray-200 bg-white h-16 flex justify-between items-center pl-2 pr-6 sticky top-0 z-10">
+        <header className="border-b border-gray-200 bg-white h-16 flex justify-between items-center pl-2 pr-4 sm:pr-6 sticky top-0 z-10">
             <SidebarTrigger />
-            <div className="flex items-center justify-between">
-                <Avatar>
+            <div className="flex items-center justify-between min-w-0">
+                <Avatar className="shrink-0">
                     <AvatarImage
                         src={profileQuery.data?.data?.profile_image || ""}
                         alt="@shadcn"
@@ -22,7 +22,7 @@ export function Header() {
                         {profileQuery.data?.data?.name?.split(" ").map((n) => n[0]).join("")}
                     </AvatarFallback>
                 </Avatar>
-                <span className="ml-2 text-sm font-medium">{profileQuery.data?.data?.name}</span>
+                <span className="ml-2 text-sm font-medium truncate max-w-[120px] sm:max-w-none">{profileQuery.data?.data?.name}</span>
             </div>
         </header>
     )

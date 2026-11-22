@@ -156,7 +156,7 @@ function RouteComponent() {
 
   return (
     <div className="space-y-6">
-      <div className="overflow-hidden rounded-[28px] border border-border/70 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-2xl shadow-slate-950/20">
+      <div className="overflow-hidden rounded-2xl sm:rounded-[28px] border border-border/70 bg-gradient-to-br from-slate-950 via-slate-900 to-slate-800 p-4 sm:p-6 text-white shadow-2xl shadow-slate-950/20">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-2xl space-y-3">
             <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-sm font-medium text-slate-100 backdrop-blur">
@@ -164,13 +164,13 @@ function RouteComponent() {
               Drag cards between lanes to update status
             </div>
             <div>
-              <h1 className="text-3xl font-semibold tracking-tight">Kanban board</h1>
+              <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight">Kanban board</h1>
               <p className="mt-2 text-sm text-slate-300 sm:text-base">
                 A polished board for tracking work, with visibility tailored to your role. {visibleLabel} is currently active.
               </p>
             </div>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur">
+          <div className="rounded-2xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur self-start sm:self-auto">
             <div className="text-xs uppercase tracking-[0.3em] text-slate-300">Workspace view</div>
             <div className="mt-1 text-lg font-semibold">{visibleLabel}</div>
           </div>
@@ -211,7 +211,7 @@ function KanbanColumn({ column, tasks }: KanbanColumnProps) {
     <div
       ref={setNodeRef}
       className={cn(
-        "rounded-[24px] border border-border/70 bg-background/80 p-4 shadow-sm transition-all duration-200",
+        "rounded-2xl sm:rounded-[24px] border border-border/70 bg-background/80 p-3 sm:p-4 shadow-sm transition-all duration-200",
         isOver && "border-sky-400 ring-2 ring-sky-400/20"
       )}
     >

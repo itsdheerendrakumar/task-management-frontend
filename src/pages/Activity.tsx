@@ -140,12 +140,12 @@ export function Activity() {
     const paginationItems = getPaginationItems(page, totalPages);
 
     return (
-        <Card>
-            <CardHeader className="flex items-center justify-between gap-4 flex-wrap">
-                <CardTitle>Activity Log</CardTitle>
-                <div className="flex items-center gap-4">
+        <Card className="min-w-0">
+            <CardHeader className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <CardTitle className="text-xl sm:text-2xl">Activity Log</CardTitle>
+                <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto">
                     <Select value={userId} onValueChange={(value) => { setUserId(value); setPage(1); handleAllChecked() }} disabled={activityQuery.isFetching}>
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-full sm:w-[180px]">
                             <SelectValue placeholder="Select User" />
                         </SelectTrigger>
                         <SelectContent>
@@ -179,7 +179,7 @@ export function Activity() {
                 </div>
             </CardHeader>
 
-            <CardContent className="p-0 relative">
+            <CardContent className="p-0 relative overflow-x-auto min-w-0">
                 {activityQuery.isFetching && !activityQuery.isLoading &&
                     <OverlayLoader />
                 }
@@ -271,9 +271,9 @@ export function Activity() {
                     </TableBody>
                 </Table>
                 {activityQuery.isSuccess && 
-                <div className="flex items-center justify-between mt-4 px-4 pb-4">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mt-4 px-4 pb-4">
                     <Select value={limit} onValueChange={(value) => { setLimit(value); setPage(1); handleAllChecked()}}>
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-full sm:w-[180px]">
                             <SelectValue placeholder="Rows per page" />
                         </SelectTrigger>
                         <SelectContent>
@@ -287,11 +287,11 @@ export function Activity() {
                         </SelectContent>
                     </Select>
 
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
                         <span className="text-sm text-muted-foreground">
                             Page {page} of {totalPages}
                         </span>
-                        <Pagination className="mx-0 w-auto justify-end">
+                        <Pagination className="mx-0 w-auto justify-center sm:justify-end">
                             <PaginationContent>
                                 <PaginationItem>
                                     <PaginationPrevious
